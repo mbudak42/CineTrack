@@ -1,0 +1,71 @@
+## .NET / Visual Studio / VS Code genel ignore ayarları
+
+# Build çıktıları
+bin/
+obj/
+Debug/
+Release/
+x64/
+x86/
+[Bb]uild/
+[Ll]og/
+[Tt]emp/
+
+# Yayın (publish) klasörleri
+publish/
+dist/
+out/
+
+# Kullanıcıya özel dosyalar
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+# VS Code klasörleri
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# JetBrains Rider / ReSharper
+.idea/
+*.DotSettings.user
+_ReSharper*/
+
+# ASP.NET Core log ve cache
+logs/
+wwwroot/lib/
+wwwroot/node_modules/
+node_modules/
+.bundle/
+bower_components/
+*.log
+
+# User secrets ve configler
+secrets.json
+appsettings.*.json
+!appsettings.json   # yalnızca genel appsettings dosyası tutulur
+
+# Paket yöneticileri
+*.nupkg
+*.snupkg
+*.nuspec
+project.lock.json
+packages/
+.nuget/
+*.vspscc
+
+# Test sonuçları
+TestResult.xml
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+# Diğer
+*.dbmdl
+*.bak
+*.m*
