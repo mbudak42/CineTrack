@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keşfet - Sosyal Kütüphane</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #F0F2F2;
+            color: #261E1C;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #8C583A 0%, #733B27 100%);
+            color: #F0F2F2;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5em;
+            font-weight: 600;
+            text-decoration: none;
+            color: #F0F2F2;
+        }
+
+        .nav {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav a {
+            color: #F0F2F2;
+            text-decoration: none;
+            transition: opacity 0.3s;
+            font-weight: 500;
+        }
+
+        .nav a:hover {
+            opacity: 0.8;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #261E1C;
+        }
+
+        /* Search Bar */
+        .search-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #A66D58;
+            border-radius: 10px;
+            font-size: 1.1em;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #8C583A;
+            box-shadow: 0 0 0 3px rgba(140, 88, 58, 0.1);
+        }
+
+        .search-btn {
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #8C583A 0%, #733B27 100%);
+            color: #F0F2F2;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(140, 88, 58, 0.3);
+        }
+
+        .content-type-tabs {
+            display: flex;
+            gap: 10px;
+        }
+
+        .type-tab {
+            padding: 10px 25px;
+            background: #F0F2F2;
+            border: 2px solid #A66D58;
+            color: #733B27;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .type-tab.active {
+            background: #8C583A;
+            color: #F0F2F2;
+            border-color: #8C583A;
+        }
+
+        /* Filters */
+        .filters-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+
+        .filters-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .filters-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #261E1C;
+        }
+
+        .clear-filters {
+            background: none;
+            border: none;
+            color: #8C583A;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: underline;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: #261E1C;
+            font-size: 0.95em;
+        }
+
+        .filter-select {
+            padding: 10px 15px;
+            border: 2px solid #A66D58;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            background: white;
+            color: #261E1C;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #8C583A;
+        }
+
+        /* Featured Sections */
+        .featured-section {
+            margin-bottom: 40px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #261E1C;
+        }
+
+        .view-all {
+            color: #8C583A;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .view-all:hover {
+            color: #733B27;
+        }
+
+        .content-carousel {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 20px;
+        }
+
+        .content-card {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+            background: white;
+        }
+
+        .content-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .content-poster {
+            width: 100%;
+            aspect-ratio: 2/3;
+            object-fit: cover;
+        }
+
+        .content-info {
+            padding: 12px;
+        }
+
+        .content-title {
+            font-size: 1em;
+            font-weight: 600;
+            color: #261E1C;
+            margin-bottom: 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .content-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85em;
+            color: #733B27;
+        }
+
+        .content-year {
+            opacity: 0.8;
+        }
+
+        .content-rating {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            color: #FFB300;
+            font-weight: 600;
+        }
+
+        /* Search Results */
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .results-count {
+            font-size: 1.2em;
+            color: #733B27;
+        }
+
+        .sort-select {
+            padding: 8px 15px;
+            border: 2px solid #A66D58;
+            border-radius: 8px;
+            font-size: 0.95em;
+            cursor: pointer;
+            background: white;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 15px;
+        }
+
+        .no-results-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .no-results-text {
+            color: #733B27;
+            font-size: 1.2em;
+        }
+
+        @media (max-width: 768px) {
+            .search-container {
+                flex-direction: column;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .content-carousel {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 15px;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <a href="/" class="logo">📚 Sosyal Kütüphane</a>
+            <nav class="nav">
+                <a href="/ana-sayfa">Ana Sayfa 🏠</a>
+                <a href="/kesif">Keşfet 🔍</a>
+                <a href="/profil">Profilim 👤</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">Keşfet</h1>
+        </div>
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Film veya kitap ara..." id="searchInput">
+                <button class="search-btn" onclick="performSearch()">🔍 Ara</button>
+            </div>
+            <div class="content-type-tabs">
+                <button class="type-tab active" onclick="setContentType('all')">Tümü</button>
+                <button class="type-tab" onclick="setContentType('movie')">📽️ Filmler</button>
+                <button class="type-tab" onclick="setContentType('book')">📚 Kitaplar</button>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-section">
+            <div class="filters-header">
+                <h3 class="filters-title">🎛️ Filtreler</h3>
+                <button class="clear-filters" onclick="clearFilters()">Filtreleri Temizle</button>
+            </div>
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label class="filter-label">Tür</label>
+                    <select class="filter-select" id="genreFilter" onchange="applyFilters()">
+                        <option value="">Tüm Türler</option>
+                        <option value="action">Aksiyon</option>
+                        <option value="drama">Drama</option>
+                        <option value="comedy">Komedi</option>
+                        <option value="scifi">Bilim Kurgu</option>
+                        <option value="romance">Romantik</option>
+                        <option value="thriller">Gerilim</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Yıl</label>
+                    <select class="filter-select" id="yearFilter" onchange="applyFilters()">
+                        <option value="">Tüm Yıllar</option>
+                        <option value="2024">2024</option>
+                        <option value="2023">2023</option>
+                        <option value="2020-2022">2020-2022</option>
+                        <option value="2010-2019">2010-2019</option>
+                        <option value="2000-2009">2000-2009</option>
+                        <option value="before-2000">2000 Öncesi</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Minimum Puan</label>
+                    <select class="filter-select" id="ratingFilter" onchange="applyFilters()">
+                        <option value="">Tüm Puanlar</option>
+                        <option value="9">9.0+ ⭐⭐⭐⭐⭐</option>
+                        <option value="8">8.0+ ⭐⭐⭐⭐</option>
+                        <option value="7">7.0+ ⭐⭐⭐</option>
+                        <option value="6">6.0+ ⭐⭐</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Sıralama</label>
+                    <select class="filter-select" id="sortFilter" onchange="applyFilters()">
+                        <option value="popular">En Popüler</option>
+                        <option value="rating">En Yüksek Puan</option>
+                        <option value="recent">En Yeni</option>
+                        <option value="title">İsme Göre (A-Z)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Results (Initially Hidden) -->
+        <div id="searchResults" style="display: none;">
+            <div class="results-header">
+                <div class="results-count">
+                    <span id="resultsCount">0</span> sonuç bulundu
+                </div>
+            </div>
+            <div class="content-carousel" id="resultsGrid"></div>
+        </div>
+
+        <!-- Featured: Top Rated -->
+        <div class="featured-section" id="topRatedSection">
+            <div class="section-header">
+                <h2 class="section-title">⭐ En Yüksek Puanlılar</h2>
+                <a href="#" class="view-all">Tümünü Gör →</a>
+            </div>
+            <div class="content-carousel">
+                <div class="content-card" onclick="goToContent('movie', 1)">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='300'%3E%3Crect width='200' height='300' fill='%23A66D58'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23F0F2F2' font-size='18' font-family='Arial'%3EThe Shawshank%3C/text%3E%3C/svg%3E" class="content-poster">
+                    <div class="content-info">
+                        <div class="content-title">The Shawshank Redemption</div>
+                        <div class="content-meta">
+                            <span class="content-year">1994</span>
+                            <span class="content-rating">★ 9.3</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-card" onclick="goToContent('movie', 2)">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='300'%3E%3Crect width='200' height='300' fill='%238C583A'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23F0F2F2' font-size='20' font-family='Arial'%3EThe Godfather%3C/text%3E%3C/svg%3E" class="content-poster">
+                    <div class="content-info">
+                        <div class="content-title">The Godfather</div>
+                        <div class="content-meta">
+                            <span class="content-year">1972</span>
+                            <span class="content-rating">★ 9.2</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-card" onclick="goToContent('movie', 3)">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='300'%3E%3Crect width='200' height='300' fill='%23733B27'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23F0F2F2' font-size='20' font-family='Arial'%3EThe Dark Knight%3C/text%3E%3C/svg%3E" class="content-poster">
+                    <div class="content-info">
+                        <div class="content-title">The Dark Knight</div>
+                        <div class="content-meta">
+                            <span class="content-year">2008</span>
+                            <span class="content-rating">★ 9.0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-card" onclick="goToContent('book', 4)">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='300'%3E%3Crect width='200' height='300' fill='%23A66D58'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23F0F2F2' font-size='22' font-family='Arial'%3E1984%3C/text%3E%3C/svg%3E" class="content-poster">
+                    <div class="content-info">
+                        <div class="content-title">1984</div>
+                        <div class="content-meta">
+                            <span class="content-year">1949</span>
+                            <span class="content-rating">★ 8.7</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-card" onclick="goToContent('movie', 5)">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='300'%3E%3Crect width='200' height='300' fill='%238C583A'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23F0F2F2' font-size='20' font-family='Arial'%3EInception%3C/text%3E%3C/svg%3E" class="content-poster">
+                    <div class="content-info">
+                        <div class="content-title">Inception</div>
+                        <div class="content-meta">
+                            <span class="content-year">2010</span>
+                            <span class="content-rating">★ 8.8</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Featured: Most Popular -->
+        <div class="featured-section" id="popularSection">
+            <div class="section-header">
+                <h2 class="section-title">🔥 En Popülerler</h2>
+                <a href="#" class="view-all">Tümünü Gör →</a>
+            </div>
+            <div class="content-carousel">
+                <div class="content-card" onclick="goToContent('movie', 6)">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='300'%3E%3Crect width='200' height='300' fill='%23733B27'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23F0F2F2' font-size='20' font-family='Arial'%3EAvengers%3C/text%3E%3C/svg%3E" class="content-poster">
+                    <div class="content-info">
+                        <div class="content-title">Avengers: Endgame</div>
+                        <div class="content-meta">
+                            <span class="content-year">2019</span>
+                            <span class="content-rating">★ 8.4</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-card" onclick="goToContent('book', 7)">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='300'%3E%3Crect width='200' height='300' fill='%23A66D58'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23F0F2F2' font-size='18' font-family='Arial'%3EHarry Potter%3C/text%3E%3C/svg%3E" class="content-poster">
+                    <div class="content-info">
+                        <div class="content-title">Harry Potter and the...</div>
+                        <div class="content-meta">
+                            <span class="content-year">1997</span>
+                            <span class="content-rating">★ 8.6</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-card" onclick="goToContent('movie', 8)">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='300'%3E%3Crect width='200' height='300' fill='%238C583A'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23F0F2F2' font-size='20' font-family='Arial'%3EInterstellar%3C/text%3E%3C/svg%3E" class="content-poster">
+                    <div class="content-info">
+                        <div class="content-title">Interstellar</div>
+                        <div class="content-meta">
+                            <span class="content-year">2014</span>
+                            <span class="content-rating">★ 8.7</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-card" onclick="goToContent('book', 9)">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='300'%3E%3Crect width='200' height='300' fill='%23733B27'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23F0F2F2' font-size='18' font-family='Arial'%3EThe Hobbit%3C/text%3E%3C/svg%3E" class="content-poster">
+                    <div class="content-info">
+                        <div class="content-title">The Hobbit</div>
+                        <div class="content-meta">
+                            <span class="content-year">1937</span>
+                            <span class="content-rating">★ 8.3</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-card" onclick="goToContent('movie', 10)">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='300'%3E%3Crect width='200' height='300' fill='%23A66D58'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23F0F2F2' font-size='20' font-family='Arial'%3EThe Matrix%3C/text%3E%3C/svg%3E" class="content-poster">
+                    <div class="content-info">
+                        <div class="content-title">The Matrix</div>
+                        <div class="content-meta">
+                            <span class="content-year">1999</span>
+                            <span class="content-rating">★ 8.7</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentContentType = 'all';
+        let searchActive = false;
+
+        function setContentType(type) {
+            currentContentType = type;
+            
+            document.querySelectorAll('.type-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            if (searchActive) {
+                performSearch();
+            }
+        }
+
+        function performSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            
+            if (query.length === 0) {
+                hideSearchResults();
+                return;
+            }
+
+            searchActive = true;
+            showSearchResults();
+
+            // API çağrısı
+            /*
+            fetch(`/api/search?q=${query}&type=${currentContentType}`)
+                .then(response => response.json())
+                .then(data => {
+                    displaySearchResults(data);
+                });
+            */
+
+            // Demo için örnek sonuçlar
+            document.getElementById('resultsCount').textContent = 42;
+            console.log('Searching for:', query, 'Type:', currentContentType);
+        }
+
+        function showSearchResults() {
+            document.getElementById('searchResults').style.display = 'block';
+            document.getElementById('topRatedSection').style.display = 'none';
+            document.getElementById('popularSection').style.display = 'none';
+        }
+
+        function hideSearchResults() {
+            searchActive = false;
+            document.getElementById('searchResults').style.display = 'none';
+            document.getElementById('topRatedSection').style.display = 'block';
+            document.getElementById('popularSection').style.display = 'block';
+        }
+
+        function applyFilters() {
+            const genre = document.getElementById('genreFilter').value;
+            const year = document.getElementById('yearFilter').value;
+            const rating = document.getElementById('ratingFilter').value;
+            const sort = document.getElementById('sortFilter').value;
+
+            console.log('Filters:', { genre, year, rating, sort });
+
+            // API çağrısı
+            /*
+            fetch(`/api/discover?genre=${genre}&year=${year}&rating=${rating}&sort=${sort}&type=${currentContentType}`)
+                .then(response => response.json())
+                .then(data => {
+                    updateContent(data);
+                });
+            */
+        }
+
+        function clearFilters() {
+            document.getElementById('genreFilter').value = '';
+            document.getElementById('yearFilter').value = '';
+            document.getElementById('ratingFilter').value = '';
+            document.getElementById('sortFilter').value = 'popular';
+            applyFilters();
+        }
+
+        function goToContent(type, id) {
+            window.location.href = `/eser/${type}/${id}`;
+        }
+
+        // Enter tuşuyla arama
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    </script>
+</body>
+</html>

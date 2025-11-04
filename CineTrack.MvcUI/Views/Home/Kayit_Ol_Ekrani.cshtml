@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kayıt Ol - Sosyal Kütüphane</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #261E1C 0%, #733B27 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: #F0F2F2;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            max-width: 900px;
+            width: 100%;
+            display: flex;
+            min-height: 600px;
+        }
+
+        .left-panel {
+            background: linear-gradient(135deg, #8C583A 0%, #A66D58 100%);
+            padding: 60px 40px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #F0F2F2;
+            text-align: center;
+        }
+
+        .left-panel h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .left-panel p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            opacity: 0.95;
+        }
+
+        .right-panel {
+            flex: 1;
+            padding: 50px 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow-y: auto;
+        }
+
+        .form-title {
+            color: #261E1C;
+            font-size: 2em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .form-subtitle {
+            color: #733B27;
+            margin-bottom: 25px;
+            font-size: 0.95em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #261E1C;
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #A66D58;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s;
+            background: #F0F2F2;
+            color: #261E1C;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #8C583A;
+            box-shadow: 0 0 0 3px rgba(140, 88, 58, 0.1);
+        }
+
+        input.error {
+            border-color: #c62828;
+        }
+
+        input.success {
+            border-color: #2e7d32;
+        }
+
+        .error-text {
+            color: #c62828;
+            font-size: 0.85em;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-text.show {
+            display: block;
+        }
+
+        .password-strength {
+            margin-top: 8px;
+        }
+
+        .strength-bar {
+            height: 4px;
+            background: #ddd;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+
+        .strength-bar-fill {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s;
+            border-radius: 2px;
+        }
+
+        .strength-text {
+            font-size: 0.85em;
+            color: #733B27;
+        }
+
+        .strength-weak .strength-bar-fill {
+            width: 33%;
+            background: #c62828;
+        }
+
+        .strength-medium .strength-bar-fill {
+            width: 66%;
+            background: #f57c00;
+        }
+
+        .strength-strong .strength-bar-fill {
+            width: 100%;
+            background: #2e7d32;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #8C583A 0%, #733B27 100%);
+            color: #F0F2F2;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(140, 88, 58, 0.3);
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(140, 88, 58, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #733B27;
+            font-size: 0.95em;
+        }
+
+        .login-link a {
+            color: #8C583A;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .login-link a:hover {
+            color: #733B27;
+        }
+
+        .terms {
+            margin-top: 15px;
+            font-size: 0.85em;
+            color: #733B27;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .terms a {
+            color: #8C583A;
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .left-panel {
+                padding: 40px 30px;
+            }
+
+            .left-panel h1 {
+                font-size: 2em;
+            }
+
+            .right-panel {
+                padding: 40px 30px;
+            }
+
+            .form-title {
+                font-size: 1.7em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <h1>📚 Sosyal Kütüphane</h1>
+            <p>Okuma ve izleme deneyiminizi sosyal hale getirin. Binlerce kullanıcıyla kitap ve film keşfine başlayın.</p>
+        </div>
+        <div class="right-panel">
+            <h2 class="form-title">Hesap Oluştur</h2>
+            <p class="form-subtitle">Aramıza katılın ve keşfe başlayın</p>
+
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="username">Kullanıcı Adı</label>
+                    <input type="text" id="username" name="username" placeholder="kullaniciadi" required>
+                    <div class="error-text" id="usernameError">Kullanıcı adı en az 3 karakter olmalıdır</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">E-posta</label>
+                    <input type="email" id="email" name="email" placeholder="ornek@email.com" required>
+                    <div class="error-text" id="emailError">Geçerli bir e-posta adresi giriniz</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Şifre</label>
+                    <input type="password" id="password" name="password" placeholder="••••••••" required>
+                    <div class="password-strength" id="passwordStrength">
+                        <div class="strength-bar">
+                            <div class="strength-bar-fill"></div>
+                        </div>
+                        <div class="strength-text">Şifre gücü</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="passwordConfirm">Şifre Tekrar</label>
+                    <input type="password" id="passwordConfirm" name="passwordConfirm" placeholder="••••••••" required>
+                    <div class="error-text" id="passwordConfirmError">Şifreler eşleşmiyor</div>
+                </div>
+
+                <button type="submit" class="btn">Kayıt Ol</button>
+            </form>
+
+            <div class="terms">
+                Kayıt olarak <a href="/kullanim-kosullari">Kullanım Koşullarını</a> ve <a href="/gizlilik">Gizlilik Politikasını</a> kabul etmiş olursunuz.
+            </div>
+            
+            <div class="login-link">
+                Zaten hesabınız var mı? <a href="/giris">Giriş Yapın</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('registerForm');
+        const username = document.getElementById('username');
+        const email = document.getElementById('email');
+        const password = document.getElementById('password');
+        const passwordConfirm = document.getElementById('passwordConfirm');
+        const passwordStrength = document.getElementById('passwordStrength');
+
+        // Real-time validation
+        username.addEventListener('input', validateUsername);
+        email.addEventListener('input', validateEmail);
+        password.addEventListener('input', function() {
+            validatePassword();
+            checkPasswordStrength();
+        });
+        passwordConfirm.addEventListener('input', validatePasswordConfirm);
+
+        function validateUsername() {
+            const value = username.value.trim();
+            const error = document.getElementById('usernameError');
+            
+            if (value.length < 3) {
+                username.classList.add('error');
+                username.classList.remove('success');
+                error.classList.add('show');
+                return false;
+            } else {
+                username.classList.remove('error');
+                username.classList.add('success');
+                error.classList.remove('show');
+                return true;
+            }
+        }
+
+        function validateEmail() {
+            const value = email.value.trim();
+            const error = document.getElementById('emailError');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (!emailRegex.test(value)) {
+                email.classList.add('error');
+                email.classList.remove('success');
+                error.classList.add('show');
+                return false;
+            } else {
+                email.classList.remove('error');
+                email.classList.add('success');
+                error.classList.remove('show');
+                return true;
+            }
+        }
+
+        function validatePassword() {
+            const value = password.value;
+            
+            if (value.length < 6) {
+                password.classList.add('error');
+                password.classList.remove('success');
+                return false;
+            } else {
+                password.classList.remove('error');
+                password.classList.add('success');
+                return true;
+            }
+        }
+
+        function validatePasswordConfirm() {
+            const error = document.getElementById('passwordConfirmError');
+            
+            if (password.value !== passwordConfirm.value) {
+                passwordConfirm.classList.add('error');
+                passwordConfirm.classList.remove('success');
+                error.classList.add('show');
+                return false;
+            } else {
+                passwordConfirm.classList.remove('error');
+                passwordConfirm.classList.add('success');
+                error.classList.remove('show');
+                return true;
+            }
+        }
+
+        function checkPasswordStrength() {
+            const value = password.value;
+            let strength = 0;
+            
+            if (value.length >= 8) strength++;
+            if (value.match(/[a-z]/) && value.match(/[A-Z]/)) strength++;
+            if (value.match(/[0-9]/)) strength++;
+            if (value.match(/[^a-zA-Z0-9]/)) strength++;
+            
+            passwordStrength.className = 'password-strength';
+            const strengthText = passwordStrength.querySelector('.strength-text');
+            
+            if (strength <= 1) {
+                passwordStrength.classList.add('strength-weak');
+                strengthText.textContent = 'Zayıf şifre';
+            } else if (strength <= 2) {
+                passwordStrength.classList.add('strength-medium');
+                strengthText.textContent = 'Orta güçlü şifre';
+            } else {
+                passwordStrength.classList.add('strength-strong');
+                strengthText.textContent = 'Güçlü şifre';
+            }
+        }
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const isUsernameValid = validateUsername();
+            const isEmailValid = validateEmail();
+            const isPasswordValid = validatePassword();
+            const isPasswordConfirmValid = validatePasswordConfirm();
+            
+            if (isUsernameValid && isEmailValid && isPasswordValid && isPasswordConfirmValid) {
+                const formData = {
+                    username: username.value,
+                    email: email.value,
+                    password: password.value
+                };
+
+                // .NET API çağrısı
+                /*
+                fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = '/giris?registered=true';
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Bir hata oluştu. Lütfen tekrar deneyin.');
+                });
+                */
+                
+                console.log('Register data:', formData);
+                alert('Kayıt başarılı! (Demo mod)');
+            }
+        });
+    </script>
+</body>
+</html>

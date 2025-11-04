@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yorumlar - The Shawshank Redemption</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #F0F2F2;
+            color: #261E1C;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #8C583A 0%, #733B27 100%);
+            color: #F0F2F2;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5em;
+            font-weight: 600;
+            text-decoration: none;
+            color: #F0F2F2;
+        }
+
+        .nav {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav a {
+            color: #F0F2F2;
+            text-decoration: none;
+            transition: opacity 0.3s;
+            font-weight: 500;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        /* Page Header */
+        .page-header {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .content-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .small-poster {
+            width: 80px;
+            height: 120px;
+            border-radius: 8px;
+            object-fit: cover;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .content-text {
+            flex: 1;
+        }
+
+        .content-title {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #261E1C;
+            margin-bottom: 5px;
+        }
+
+        .content-meta {
+            color: #733B27;
+            font-size: 0.95em;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: #8C583A;
+            text-decoration: none;
+            font-weight: 500;
+            margin-top: 12px;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: #733B27;
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .comments-count {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #261E1C;
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .sort-label {
+            color: #733B27;
+            font-weight: 500;
+        }
+
+        .sort-select {
+            padding: 8px 15px;
+            border: 2px solid #A66D58;
+            border-radius: 8px;
+            font-size: 0.95em;
+            cursor: pointer;
+            background: white;
+            color: #261E1C;
+        }
+
+        .sort-select:focus {
+            outline: none;
+            border-color: #8C583A;
+        }
+
+        /* Add Comment Section */
+        .add-comment-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            font-size: 1.4em;
+            font-weight: 600;
+            color: #261E1C;
+            margin-bottom: 20px;
+        }
+
+        .comment-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .rating-input-section {
+            background: #F0F2F2;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .rating-label {
+            font-weight: 600;
+            color: #261E1C;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .star-rating-input {
+            display: flex;
+            gap: 8px;
+            font-size: 2.5em;
+        }
+
+        .star-input {
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #ddd;
+        }
+
+        .star-input:hover,
+        .star-input.active {
+            color: #FFB300;
+            transform: scale(1.1);
+        }
+
+        .selected-rating-text {
+            margin-top: 10px;
+            color: #733B27;
+            font-weight: 500;
+        }
+
+        .comment-textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #A66D58;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1em;
+            resize: vertical;
+        }
+
+        .comment-textarea:focus {
+            outline: none;
+            border-color: #8C583A;
+            box-shadow: 0 0 0 3px rgba(140, 88, 58, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #8C583A 0%, #733B27 100%);
+            color: #F0F2F2;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(140, 88, 58, 0.3);
+        }
+
+        /* Comments List */
+        .comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .comment-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+        }
+
+        .comment-card:hover {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .comment-header {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .comment-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #A66D58 0%, #8C583A 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.2em;
+            flex-shrink: 0;
+        }
+
+        .comment-header-content {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .comment-user-info {
+            flex: 1;
+        }
+
+        .comment-username {
+            font-weight: 600;
+            font-size: 1.1em;
+            color: #261E1C;
+            margin-bottom: 3px;
+        }
+
+        .comment-date {
+            color: #A66D58;
+            font-size: 0.9em;
+        }
+
+        .comment-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #FFB300;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .comment-text {
+            color: #261E1C;
+            line-height: 1.8;
+            font-size: 1.05em;
+            margin-bottom: 15px;
+        }
+
+        .comment-footer {
+            display: flex;
+            gap: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #F0F2F2;
+        }
+
+        .comment-action-btn {
+            background: none;
+            border: none;
+            color: #A66D58;
+            cursor: pointer;
+            font-size: 0.95em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s;
+            padding: 5px 10px;
+            border-radius: 6px;
+        }
+
+        .comment-action-btn:hover {
+            background: #F0F2F2;
+            color: #8C583A;
+        }
+
+        .comment-action-btn.liked {
+            color: #c62828;
+        }
+
+        .comment-options {
+            margin-left: auto;
+        }
+
+        .options-btn {
+            background: none;
+            border: none;
+            color: #A66D58;
+            cursor: pointer;
+            font-size: 1.2em;
+            padding: 5px 10px;
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+
+        .options-btn:hover {
+            background: #F0F2F2;
+        }
+
+        /* Load More */
+        .load-more {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .load-more-btn {
+            padding: 12px 40px;
+            background: linear-gradient(135deg, #8C583A 0%, #733B27 100%);
+            color: #F0F2F2;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .load-more-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(140, 88, 58, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .filter-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .filter-controls {
+                width: 100%;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .sort-select {
+                width: 100%;
+            }
+
+            .star-rating-input {
+                font-size: 2em;
+            }
+
+            .comment-header-content {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <a href="/" class="logo">📚 Sosyal Kütüphane</a>
+            <nav class="nav">
+                <a href="/ana-sayfa">Ana Sayfa 🏠</a>
+                <a href="/kesif">Keşfet 🔍</a>
+                <a href="/profil">Profilim 👤</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="content-info">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='120'%3E%3Crect width='80' height='120' fill='%23A66D58'/%3E%3C/svg%3E" alt="Poster" class="small-poster">
+                <div class="content-text">
+                    <h1 class="content-title">The Shawshank Redemption</h1>
+                    <p class="content-meta">1994 • Drama, Suç • 142 dakika</p>
+                    <a href="/eser/film/1" class="back-link">← Filme Dön</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <div class="comments-count">
+                <strong>48</strong> Yorum
+            </div>
+            <div class="filter-controls">
+                <span class="sort-label">Sırala:</span>
+                <select class="sort-select" onchange="sortComments(this.value)">
+                    <option value="recent">En Yeni</option>
+                    <option value="popular">En Beğenilen</option>
+                    <option value="rating-high">En Yüksek Puan</option>
+                    <option value="rating-low">En Düşük Puan</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Add Comment -->
+        <div class="add-comment-section">
+            <h2 class="section-title">Yorum Ekle</h2>
+            <form class="comment-form" onsubmit="submitComment(event)">
+                <div class="rating-input-section">
+                    <label class="rating-label">Puanınız</label>
+                    <div class="star-rating-input" id="starRatingInput">
+                        <span class="star-input" data-rating="1">★</span>
+                        <span class="star-input" data-rating="2">★</span>
+                        <span class="star-input" data-rating="3">★</span>
+                        <span class="star-input" data-rating="4">★</span>
+                        <span class="star-input" data-rating="5">★</span>
+                        <span class="star-input" data-rating="6">★</span>
+                        <span class="star-input" data-rating="7">★</span>
+                        <span class="star-input" data-rating="8">★</span>
+                        <span class="star-input" data-rating="9">★</span>
+                        <span class="star-input" data-rating="10">★</span>
+                    </div>
+                    <div class="selected-rating-text" id="selectedRatingText">Puanlamak için yıldızlara tıklayın</div>
+                </div>
+                <textarea class="comment-textarea" id="commentTextarea" placeholder="Yorumunuzu buraya yazın..." required></textarea>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Yorum Yap</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Comments List -->
+        <div class="comments-list">
+            <!-- Comment 1 -->
+            <div class="comment-card">
+                <div class="comment-header">
+                    <div class="comment-avatar">AY</div>
+                    <div class="comment-header-content">
+                        <div class="comment-user-info">
+                            <div class="comment-username">Ahmet Yılmaz</div>
+                            <div class="comment-date">2 gün önce</div>
+                        </div>
+                        <div class="comment-rating">★ 9.5/10</div>
+                    </div>
+                </div>
+                <p class="comment-text">
+                    Sinema tarihinin en iyi filmlerinden biri olduğunu düşünüyorum. Hikayesi, oyunculukları, müziği... Her şey mükemmel. Özellikle Morgan Freeman'ın anlatımı ve Tim Robbins'in performansı unutulmaz. Umut ve özgürlük temasını bu kadar güzel işleyen başka bir film görmedim. 
+                    <br><br>
+                    Final sahnesi ise bambaşka bir seviye. İzlerken gözyaşlarımı tutamadım. Bu film sadece bir hapishane dramı değil, aynı zamanda insan ruhunun derinliklerine inen bir yolculuk. Herkese tavsiye ederim!
+                </p>
+                <div class="comment-footer">
+                    <button class="comment-action-btn" onclick="toggleLike(this)">
+                        ❤️ <span>24 Beğeni</span>
+                    </button>
+                    <button class="comment-action-btn">
+                        💬 Yanıtla
+                    </button>
+                    <div class="comment-options">
+                        <button class="options-btn" onclick="showOptions(this)">⋮</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comment 2 -->
+            <div class="comment-card">
+                <div class="comment-header">
+                    <div class="comment-avatar">ZK</div>
+                    <div class="comment-header-content">
+                        <div class="comment-user-info">
+                            <div class="comment-username">Zeynep Kaya</div>
+                            <div class="comment-date">5 gün önce</div>
+                        </div>
+                        <div class="comment-rating">★ 10/10</div>
+                    </div>
+                </div>
+                <p class="comment-text">
+                    Her izlediğimde yeni bir detay keşfediyorum. Bu kadar derinlikli ve anlamlı bir film nadirdir. Kesinlikle herkesin görmesi gereken bir başyapıt. Karakterler çok iyi yazılmış ve oyuncuların performansı inanılmaz. Özellikle Red karakterinin gelişimi muhteşem.
+                </p>
+                <div class="comment-footer">
+                    <button class="comment-action-btn liked" onclick="toggleLike(this)">
+                        ❤️ <span>18 Beğeni</span>
+                    </button>
+                    <button class="comment-action-btn">
+                        💬 Yanıtla
+                    </button>
+                    <div class="comment-options">
+                        <button class="options-btn" onclick="showOptions(this)">⋮</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comment 3 -->
+            <div class="comment-card">
+                <div class="comment-header">
+                    <div class="comment-avatar">MD</div>
+                    <div class="comment-header-content">
+                        <div class="comment-user-info">
+                            <div class="comment-username">Mehmet Demir</div>
+                            <div class="comment-date">1 hafta önce</div>
+                        </div>
+                        <div class="comment-rating">★ 9/10</div>
+                    </div>
+                </div>
+                <p class="comment-text">
+                    Müzikleri de ayrı bir güzel. Thomas Newman'ın besteleri filmin atmosferine çok uyuyor. Sahne geçişleri ve kurgusu da oldukça başarılı. Tempo hiç düşmüyor, 142 dakika çok hızlı geçiyor.
+                </p>
+                <div class="comment-footer">
+                    <button class="comment-action-btn" onclick="toggleLike(this)">
+                        ❤️ <span>12 Beğeni</span>
+                    </button>
+                    <button class="comment-action-btn">
+                        💬 Yanıtla
+                    </button>
+                    <div class="comment-options">
+                        <button class="options-btn" onclick="showOptions(this)">⋮</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comment 4 -->
+            <div class="comment-card">
+                <div class="comment-header">
+                    <div class="comment-avatar">EA</div>
+                    <div class="comment-header-content">
+                        <div class="comment-user-info">
+                            <div class="comment-username">Elif Arslan</div>
+                            <div class="comment-date">2 hafta önce</div>
+                        </div>
+                        <div class="comment-rating">★ 8.5/10</div>
+                    </div>
+                </div>
+                <p class="comment-text">
+                    Gerçekten etkileyici bir film. İlk yarısı biraz yavaş geldi ama sonrasında hikaye çok güzel gelişti. Son sahneleri izlerken içim ısındı. Morgan Freeman'ın sesi ve anlatımı mükemmel uyum sağlamış.
+                </p>
+                <div class="comment-footer">
+                    <button class="comment-action-btn" onclick="toggleLike(this)">
+                        ❤️ <span>8 Beğeni</span>
+                    </button>
+                    <button class="comment-action-btn">
+                        💬 Yanıtla
+                    </button>
+                    <div class="comment-options">
+                        <button class="options-btn" onclick="showOptions(this)">⋮</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Load More -->
+        <div class="load-more">
+            <button class="load-more-btn" onclick="loadMoreComments()">Daha Fazla Yorum Yükle</button>
+        </div>
+    </div>
+
+    <script>
+        let userRating = 0;
+
+        // Star Rating System
+        const starsInput = document.querySelectorAll('.star-input');
+        const selectedRatingText = document.getElementById('selectedRatingText');
+
+        starsInput.forEach(star => {
+            star.addEventListener('click', function() {
+                userRating = parseInt(this.dataset.rating);
+                updateStarsInput();
+                selectedRatingText.textContent = `Seçilen Puan: ${userRating}/10`;
+            });
+
+            star.addEventListener('mouseenter', function() {
+                const rating = parseInt(this.dataset.rating);
+                highlightStarsInput(rating);
+            });
+        });
+
+        document.getElementById('starRatingInput').addEventListener('mouseleave', function() {
+            updateStarsInput();
+        });
+
+        function highlightStarsInput(rating) {
+            starsInput.forEach((star, index) => {
+                if (index < rating) {
+                    star.style.color = '#FFB300';
+                } else {
+                    star.style.color = '#ddd';
+                }
+            });
+        }
+
+        function updateStarsInput() {
+            starsInput.forEach((star, index) => {
+                if (index < userRating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        function submitComment(event) {
+            event.preventDefault();
+            
+            const commentText = document.getElementById('commentTextarea').value.trim();
+            
+            if (userRating === 0) {
+                alert('Lütfen bir puan seçin.');
+                return;
+            }
+
+            if (commentText.length === 0) {
+                alert('Lütfen bir yorum yazın.');
+                return;
+            }
+
+            console.log('Comment:', { rating: userRating, text: commentText });
+            
+            // API çağrısı
+            /*
+            fetch('/api/content/comment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    contentId: 1, 
+                    rating: userRating,
+                    text: commentText 
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('commentTextarea').value = '';
+                userRating = 0;
+                updateStarsInput();
+                selectedRatingText.textContent = 'Puanlamak için yıldızlara tıklayın';
+                // Yorumlar listesini güncelle
+            });
+            */
+
+            alert('Yorumunuz eklendi!');
+            document.getElementById('commentTextarea').value = '';
+            userRating = 0;
+            updateStarsInput();
+            selectedRatingText.textContent = 'Puanlamak için yıldızlara tıklayın';
+        }
+
+        function toggleLike(button) {
+            button.classList.toggle('liked');
+            const likeSpan = button.querySelector('span');
+            const currentCount = parseInt(likeSpan.textContent.match(/\d+/)[0]);
+            
+            if (button.classList.contains('liked')) {
+                likeSpan.textContent = `${currentCount + 1} Beğeni`;
+            } else {
+                likeSpan.textContent = `${currentCount - 1} Beğeni`;
+            }
+
+            // API çağrısı
+        }
+
+        function showOptions(button) {
+            // Kullanıcı kendi yorumuysa düzenle/sil seçenekleri
+            alert('Düzenle / Sil seçenekleri burada görünecek');
+        }
+
+        function sortComments(sortBy) {
+            console.log('Sort by:', sortBy);
+            // API çağrısı ile yorumları sırala
+        }
+
+        function loadMoreComments() {
+            console.log('Loading more comments...');
+            // API çağrısı
+        }
+    </script>
+</body>
+</html>

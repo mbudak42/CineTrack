@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Shawshank Redemption - Sosyal Kütüphane</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #F0F2F2;
+            color: #261E1C;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #8C583A 0%, #733B27 100%);
+            color: #F0F2F2;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5em;
+            font-weight: 600;
+            text-decoration: none;
+            color: #F0F2F2;
+        }
+
+        .nav {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav a {
+            color: #F0F2F2;
+            text-decoration: none;
+            transition: opacity 0.3s;
+            font-weight: 500;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+            display: flex;
+            gap: 40px;
+        }
+
+        .poster-section {
+            flex-shrink: 0;
+        }
+
+        .poster {
+            width: 300px;
+            height: 450px;
+            border-radius: 12px;
+            object-fit: cover;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .content-section {
+            flex: 1;
+        }
+
+        .content-title {
+            font-size: 2.5em;
+            font-weight: 600;
+            color: #261E1C;
+            margin-bottom: 10px;
+        }
+
+        .content-meta {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            color: #733B27;
+            font-size: 1.05em;
+            margin-bottom: 20px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .platform-rating {
+            background: #F0F2F2;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .rating-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .rating-score {
+            font-size: 3em;
+            font-weight: 600;
+            color: #8C583A;
+        }
+
+        .rating-details {
+            flex: 1;
+        }
+
+        .rating-stars {
+            color: #FFB300;
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+
+        .rating-count {
+            color: #733B27;
+            font-size: 0.9em;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .action-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #8C583A 0%, #733B27 100%);
+            color: #F0F2F2;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(140, 88, 58, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #8C583A;
+            border: 2px solid #8C583A;
+        }
+
+        .btn-secondary:hover {
+            background: #F0F2F2;
+        }
+
+        .btn-success {
+            background: #2e7d32;
+            color: white;
+        }
+
+        .rating-widget {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .rating-widget-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #261E1C;
+            margin-bottom: 15px;
+        }
+
+        .star-rating {
+            display: flex;
+            gap: 10px;
+            font-size: 2.5em;
+        }
+
+        .star {
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #ddd;
+        }
+
+        .star:hover,
+        .star.active {
+            color: #FFB300;
+            transform: scale(1.1);
+        }
+
+        .selected-rating {
+            margin-top: 15px;
+            font-size: 1.1em;
+            color: #733B27;
+            font-weight: 500;
+        }
+
+        .synopsis {
+            color: #261E1C;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .info-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .info-item {
+            background: #F0F2F2;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #733B27;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+
+        .info-value {
+            color: #261E1C;
+        }
+
+        .genre-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .genre-tag {
+            background: #8C583A;
+            color: #F0F2F2;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        /* Comments Section */
+        .comments-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #261E1C;
+        }
+
+        .view-all-link {
+            color: #8C583A;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .view-all-link:hover {
+            color: #733B27;
+        }
+
+        .add-comment {
+            background: #F0F2F2;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+
+        .comment-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 15px;
+            border: 2px solid #A66D58;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1em;
+            resize: vertical;
+            margin-bottom: 15px;
+        }
+
+        .comment-textarea:focus {
+            outline: none;
+            border-color: #8C583A;
+            box-shadow: 0 0 0 3px rgba(140, 88, 58, 0.1);
+        }
+
+        .comment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .comment-card {
+            border: 2px solid #F0F2F2;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .comment-card:hover {
+            border-color: #A66D58;
+        }
+
+        .comment-header {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .comment-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #A66D58 0%, #8C583A 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1em;
+            flex-shrink: 0;
+        }
+
+        .comment-info {
+            flex: 1;
+        }
+
+        .comment-author {
+            font-weight: 600;
+            color: #261E1C;
+            font-size: 1.05em;
+            margin-bottom: 3px;
+        }
+
+        .comment-date {
+            color: #A66D58;
+            font-size: 0.9em;
+        }
+
+        .comment-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #FFB300;
+            font-size: 1.1em;
+        }
+
+        .comment-text {
+            color: #261E1C;
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+
+        .comment-footer {
+            display: flex;
+            gap: 20px;
+        }
+
+        .comment-action {
+            background: none;
+            border: none;
+            color: #A66D58;
+            cursor: pointer;
+            font-size: 0.95em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s;
+            padding: 5px 10px;
+            border-radius: 6px;
+        }
+
+        .comment-action:hover {
+            background: #F0F2F2;
+            color: #8C583A;
+        }
+
+        .comment-action.liked {
+            color: #c62828;
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                flex-direction: column;
+            }
+
+            .poster {
+                width: 100%;
+                max-width: 300px;
+                height: auto;
+            }
+
+            .user-actions {
+                flex-direction: column;
+            }
+
+            .action-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <a href="/" class="logo">📚 Sosyal Kütüphane</a>
+            <nav class="nav">
+                <a href="/ana-sayfa">Ana Sayfa 🏠</a>
+                <a href="/kesif">Keşfet 🔍</a>
+                <a href="/profil">Profilim 👤</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="hero">
+            <div class="poster-section">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='450'%3E%3Crect width='300' height='450' fill='%23A66D58'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23F0F2F2' font-size='24' font-family='Arial'%3EThe Shawshank%0ARedemption%3C/text%3E%3C/svg%3E" alt="The Shawshank Redemption" class="poster">
+                
+                <div class="rating-widget">
+                    <div class="rating-widget-title">🌟 Puanınızı Verin</div>
+                    <div class="star-rating" id="userRating">
+                        <span class="star" data-rating="1">★</span>
+                        <span class="star" data-rating="2">★</span>
+                        <span class="star" data-rating="3">★</span>
+                        <span class="star" data-rating="4">★</span>
+                        <span class="star" data-rating="5">★</span>
+                        <span class="star" data-rating="6">★</span>
+                        <span class="star" data-rating="7">★</span>
+                        <span class="star" data-rating="8">★</span>
+                        <span class="star" data-rating="9">★</span>
+                        <span class="star" data-rating="10">★</span>
+                    </div>
+                    <div class="selected-rating" id="selectedRating">Puanlamak için yıldızlara tıklayın</div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h1 class="content-title">The Shawshank Redemption</h1>
+                <div class="content-meta">
+                    <span class="meta-item">📅 1994</span>
+                    <span class="meta-item">⏱️ 142 dakika</span>
+                    <span class="meta-item">🎬 Frank Darabont</span>
+                </div>
+
+                <div class="platform-rating">
+                    <div class="rating-header">
+                        <div class="rating-score">9.3</div>
+                        <div class="rating-details">
+                            <div class="rating-stars">★★★★★</div>
+                            <div class="rating-count">2,485 kullanıcı puanı</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="user-actions">
+                    <button class="action-btn btn-success" onclick="toggleList('watched')">✓ İzledim</button>
+                    <button class="action-btn btn-secondary" onclick="toggleList('watchlist')">➕ İzlenecekler</button>
+                    <button class="action-btn btn-secondary" onclick="addToCustomList()">🗂️ Listeye Ekle</button>
+                </div>
+
+                <div class="synopsis">
+                    <strong>Özet:</strong><br>
+                    Andy Dufresne, genç ve başarılı bir bankerdir. Karısını ve sevgilisini öldürmekten suçlu bulunur ve ömür boyu hapis cezasına çarptırılır. Shawshank Hapishanesi'nde Red ile tanışır. Red, müebbet hapis cezası almış bir mahkumdur ve hapishane içinde pek çok şeyi tedarik edebilen bir arkadaştır. Andy'nin başına gelen tüm kötülüklere rağmen umudunu kaybetmeyip hayata bağlı kalması, Red dahil tüm mahkumları etkiler.
+                </div>
+
+                <div class="info-section">
+                    <div class="info-item">
+                        <div class="info-label">Yönetmen</div>
+                        <div class="info-value">Frank Darabont</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Oyuncular</div>
+                        <div class="info-value">Tim Robbins, Morgan Freeman</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Türler</div>
+                        <div class="genre-tags">
+                            <span class="genre-tag">Drama</span>
+                            <span class="genre-tag">Suç</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comments Section -->
+        <div class="comments-section">
+            <div class="section-header">
+                <h2 class="section-title">💬 Kullanıcı Yorumları</h2>
+                <a href="/eser/film/1/yorumlar" class="view-all-link">Tüm Yorumları Gör (48) →</a>
+            </div>
+
+            <div class="add-comment">
+                <textarea class="comment-textarea" id="commentText" placeholder="Yorumunuzu buraya yazın..."></textarea>
+                <button class="action-btn btn-primary" onclick="submitComment()">📝 Yorum Yap</button>
+            </div>
+
+            <div class="comment-list">
+                <div class="comment-card">
+                    <div class="comment-header">
+                        <div class="comment-avatar">AY</div>
+                        <div class="comment-info">
+                            <div class="comment-author">Ahmet Yılmaz</div>
+                            <div class="comment-date">2 gün önce</div>
+                        </div>
+                        <div class="comment-rating">★ 9.5/10</div>
+                    </div>
+                    <p class="comment-text">
+                        Sinema tarihinin en iyi filmlerinden biri olduğunu düşünüyorum. Hikayesi, oyunculukları, müziği... Her şey mükemmel. Özellikle Morgan Freeman'ın anlatımı ve Tim Robbins'in performansı unutulmaz.
+                    </p>
+                    <div class="comment-footer">
+                        <button class="comment-action" onclick="toggleCommentLike(this)">
+                            ❤️ <span>24</span>
+                        </button>
+                        <button class="comment-action">
+                            💬 Yanıtla
+                        </button>
+                    </div>
+                </div>
+
+                <div class="comment-card">
+                    <div class="comment-header">
+                        <div class="comment-avatar">ZK</div>
+                        <div class="comment-info">
+                            <div class="comment-author">Zeynep Kaya</div>
+                            <div class="comment-date">5 gün önce</div>
+                        </div>
+                        <div class="comment-rating">★ 10/10</div>
+                    </div>
+                    <p class="comment-text">
+                        Her izlediğimde yeni bir detay keşfediyorum. Bu kadar derinlikli ve anlamlı bir film nadirdir. Kesinlikle herkesin görmesi gereken bir başyapıt.
+                    </p>
+                    <div class="comment-footer">
+                        <button class="comment-action liked" onclick="toggleCommentLike(this)">
+                            ❤️ <span>18</span>
+                        </button>
+                        <button class="comment-action">
+                            💬 Yanıtla
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userRating = 0;
+
+        // Star Rating System
+        const stars = document.querySelectorAll('.star');
+        const selectedRatingText = document.getElementById('selectedRating');
+
+        stars.forEach(star => {
+            star.addEventListener('click', function() {
+                userRating = parseInt(this.dataset.rating);
+                updateStars();
+                selectedRatingText.textContent = `Seçilen Puan: ${userRating}/10`;
+                
+                // API call to save rating
+                /*
+                fetch('/api/content/rate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contentId: 1, rating: userRating })
+                });
+                */
+            });
+
+            star.addEventListener('mouseenter', function() {
+                const rating = parseInt(this.dataset.rating);
+                highlightStars(rating);
+            });
+        });
+
+        document.getElementById('userRating').addEventListener('mouseleave', function() {
+            updateStars();
+        });
+
+        function highlightStars(rating) {
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.style.color = '#FFB300';
+                } else {
+                    star.style.color = '#ddd';
+                }
+            });
+        }
+
+        function updateStars() {
+            stars.forEach((star, index) => {
+                if (index < userRating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        function toggleList(listType) {
+            const button = event.target;
+            
+            if (button.classList.contains('btn-success')) {
+                button.classList.remove('btn-success');
+                button.classList.add('btn-secondary');
+                button.innerHTML = listType === 'watched' ? '➕ İzledim' : '➕ İzlenecekler';
+            } else {
+                button.classList.remove('btn-secondary');
+                button.classList.add('btn-success');
+                button.innerHTML = '✓ ' + (listType === 'watched' ? 'İzledim' : 'İzlenecekler');
+            }
+
+            // API call
+            /*
+            fetch('/api/library/toggle', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contentId: 1, listType: listType })
+            });
+            */
+        }
+
+        function addToCustomList() {
+            // Show custom lists modal
+            alert('Özel listeleriniz burada görünecek');
+        }
+
+        function submitComment() {
+            const commentText = document.getElementById('commentText').value.trim();
+            
+            if (commentText.length === 0) {
+                alert('Lütfen bir yorum yazın.');
+                return;
+            }
+
+            if (userRating === 0) {
+                alert('Lütfen önce bir puan verin.');
+                return;
+            }
+
+            console.log('Comment:', { rating: userRating, text: commentText });
+            
+            // API call
+            /*
+            fetch('/api/content/comment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    contentId: 1, 
+                    rating: userRating,
+                    text: commentText 
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('commentText').value = '';
+                // Reload comments
+            });
+            */
+
+            alert('Yorumunuz eklendi!');
+            document.getElementById('commentText').value = '';
+        }
+
+        function toggleCommentLike(button) {
+            button.classList.toggle('liked');
+            const likeCount = button.querySelector('span');
+            const currentCount = parseInt(likeCount.textContent);
+            
+            if (button.classList.contains('liked')) {
+                likeCount.textContent = currentCount + 1;
+            } else {
+                likeCount.textContent = currentCount - 1;
+            }
+
+            // API call
+        }
+    </script>
+</body>
+</html>
