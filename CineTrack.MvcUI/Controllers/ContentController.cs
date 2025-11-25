@@ -16,7 +16,11 @@ public class ContentController : Controller
 	public async Task<IActionResult> Search(string q, string type = "movie")
 	{
 		if (string.IsNullOrWhiteSpace(q)) return View(new List<dynamic>());
-		string endpoint = type == "book" ? $"content/search/books?q={q}" : $"content/search/movies?q={q}";
+		string endpoint;
+		if (type == "book")
+			endpoint = $"api/content/search/books?q={q}";
+		else
+			endpoint = $"api/content/search/movies?q={q}";
 		var results = await _api.GetAsync<List<dynamic>>(endpoint);
 		return View(results);
 	}
@@ -24,7 +28,7 @@ public class ContentController : Controller
 	[HttpGet]
 	public async Task<IActionResult> Detail(string type, string id)
 	{
-		var content = await _api.GetAsync<dynamic>($"content/{type}/{id}");
+		var content = await _api.GetAsync<dynamic>($"/api/content/{type}/{id}");
 		return View(content);
 	}
 }

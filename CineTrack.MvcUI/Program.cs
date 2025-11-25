@@ -24,7 +24,7 @@ builder.Services.AddSession(options =>
 builder.Services.AddHttpClient<ApiService>(client =>
 {
     // WebAPI'nin çalıştığı portu buraya yaz
-    client.BaseAddress = new Uri("http://localhost:5011/api/");
+    client.BaseAddress = new Uri("http://localhost:5011/");
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
 

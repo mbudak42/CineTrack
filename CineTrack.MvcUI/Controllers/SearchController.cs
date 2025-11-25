@@ -28,22 +28,18 @@ public class SearchController : Controller
         try
         {
             // Türleri yükle
-            var genres = await _api.GetAsync<List<string>>("content/genres");
-            if (genres != null)
-            {
-                model.AvailableGenres = genres;
-            }
+            model.AvailableGenres =
+                await _api.GetAsync<List<string>>("api/content/genres") 
+                ?? new List<string>();
 
-            // Eğer arama yapıldıysa
+            // Arama yapıldıysa
             if (!string.IsNullOrWhiteSpace(query))
             {
-                var searchParams = BuildSearchQuery(query, contentType, genre, year, minRating);
-                var searchResult = await _api.GetAsync<SearchResultDto>($"content/search?{searchParams}");
-                
-                if (searchResult != null)
-                {
-                    model.SearchResults = searchResult.Results;
-                }
+                string endpoint = BuildSearchEndpoint(query, contentType, genre, year, minRating);
+
+                var searchResults = await _api.GetAsync<List<ContentCardDto>>(endpoint);
+
+                model.SearchResults = searchResults ?? new List<ContentCardDto>();
             }
             else
             {
@@ -54,7 +50,7 @@ public class SearchController : Controller
         catch (Exception ex)
         {
             ViewBag.Error = "Veriler yüklenirken bir hata oluştu.";
-            Console.WriteLine($"Search Error: {ex.Message}");
+            Console.WriteLine($"SearchController Error: {ex.Message}");
         }
 
         return View(model);
@@ -66,19 +62,15 @@ public class SearchController : Controller
     {
         try
         {
-            var searchParams = BuildSearchQuery(query, contentType, genre, year, minRating);
-            var searchResult = await _api.GetAsync<SearchResultDto>($"content/search?{searchParams}");
+            string endpoint = BuildSearchEndpoint(query, contentType, genre, year, minRating);
 
-            if (searchResult == null)
-            {
-                return PartialView("_SearchResults", new List<ContentCardDto>());
-            }
+            var searchResults = await _api.GetAsync<List<ContentCardDto>>(endpoint);
 
-            return PartialView("_SearchResults", searchResult.Results);
+            return PartialView("_SearchResults", searchResults ?? new List<ContentCardDto>());
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Search Error: {ex.Message}");
+            Console.WriteLine($"SearchPartial Error: {ex.Message}");
             return PartialView("_SearchResults", new List<ContentCardDto>());
         }
     }
@@ -88,19 +80,13 @@ public class SearchController : Controller
     {
         try
         {
-            // En Yüksek Puanlılar
-            var topRated = await _api.GetAsync<List<ContentCardDto>>("content/top-rated?limit=12");
-            if (topRated != null)
-            {
-                model.TopRated = topRated;
-            }
+            model.TopRated =
+                await _api.GetAsync<List<ContentCardDto>>("api/content/top-rated?limit=12") 
+                ?? new List<ContentCardDto>();
 
-            // En Popülerler
-            var mostPopular = await _api.GetAsync<List<ContentCardDto>>("content/most-popular?limit=12");
-            if (mostPopular != null)
-            {
-                model.MostPopular = mostPopular;
-            }
+            model.MostPopular =
+                await _api.GetAsync<List<ContentCardDto>>("api/content/most-popular?limit=12") 
+                ?? new List<ContentCardDto>();
         }
         catch (Exception ex)
         {
@@ -108,16 +94,13 @@ public class SearchController : Controller
         }
     }
 
-    // Arama parametrelerini query string'e çevir
-    private string BuildSearchQuery(string? query, string? contentType, string? genre, int? year, double? minRating)
+    // Arama endpointini oluştur
+    private string BuildSearchEndpoint(string query, string? type, string? genre, int? year, double? minRating)
     {
-        var parameters = new List<string>();
-
-        if (!string.IsNullOrWhiteSpace(query))
-            parameters.Add($"query={Uri.EscapeDataString(query)}");
-
-        if (!string.IsNullOrWhiteSpace(contentType) && contentType != "all")
-            parameters.Add($"type={contentType}");
+        var parameters = new List<string>
+        {
+            $"q={Uri.EscapeDataString(query)}"
+        };
 
         if (!string.IsNullOrWhiteSpace(genre))
             parameters.Add($"genre={Uri.EscapeDataString(genre)}");
@@ -128,6 +111,10 @@ public class SearchController : Controller
         if (minRating.HasValue)
             parameters.Add($"minRating={minRating}");
 
-        return string.Join("&", parameters);
+        string paramString = string.Join("&", parameters);
+
+        return type == "book"
+            ? $"api/content/search/books?{paramString}"
+            : $"api/content/search/movies?{paramString}";
     }
 }

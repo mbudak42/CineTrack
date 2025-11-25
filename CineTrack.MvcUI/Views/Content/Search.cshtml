@@ -14,7 +14,7 @@
 	@foreach (var item in Model)
 	{
 		<div class="content">
-			<img src="@item.coverUrl" width="100" />
+			<img src="@item.coverUrl ?? item.CoverUrl" width="100" />
 			<span>@item.title</span>
 			<a href="/Content/Detail?type=@item.contentType&id=@item.id">Detay</a>
 		</div>

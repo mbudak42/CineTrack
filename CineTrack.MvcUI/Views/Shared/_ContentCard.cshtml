@@ -1,37 +1,18 @@
 @model ContentCardDto
 
 <div class="card h-100 content-card">
-    <a asp-controller="Content" asp-action="Details" asp-route-id="@Model.Id" class="text-decoration-none">
+    <a asp-controller="Content" asp-action="Detail" asp-route-type="@Model.ContentType" asp-route-id="@Model.Id" class="text-decoration-none">
         <!-- Poster/Kapak -->
         <div class="card-img-wrapper position-relative">
-            @if (!string.IsNullOrEmpty(Model.PosterUrl))
-            {
-                <img src="@Model.PosterUrl" 
-                     class="card-img-top" 
-                     alt="@Model.Title"
-                     onerror="this.src='/images/placeholder-poster.jpg'">
-            }
-            else
-            {
-                <img src="/images/placeholder-poster.jpg" 
-                     class="card-img-top" 
-                     alt="@Model.Title">
-            }
+            <img src="@(Model.CoverUrl ?? "/images/placeholder-poster.jpg")" 
+                 class="card-img-top" 
+                 alt="@Model.Title">
 
             <!-- İçerik Türü Badge -->
             <span class="badge position-absolute top-0 end-0 m-2 @(Model.ContentType == "movie" ? "bg-danger" : "bg-info")">
                 <i class="bi @(Model.ContentType == "movie" ? "bi-film" : "bi-book") me-1"></i>
                 @(Model.ContentType == "movie" ? "Film" : "Kitap")
             </span>
-
-            <!-- Puan Badge -->
-            @if (Model.AverageRating.HasValue && Model.AverageRating > 0)
-            {
-                <span class="badge bg-warning text-dark position-absolute bottom-0 start-0 m-2">
-                    <i class="bi bi-star-fill me-1"></i>
-                    @Model.AverageRating.Value.ToString("0.0")
-                </span>
-            }
         </div>
 
         <!-- İçerik Bilgileri -->
@@ -39,34 +20,6 @@
             <h6 class="card-title text-dark mb-1" title="@Model.Title">
                 @(Model.Title.Length > 50 ? Model.Title.Substring(0, 47) + "..." : Model.Title)
             </h6>
-            
-            <div class="card-text">
-                <small class="text-muted d-block">
-                    @if (Model.Year.HasValue)
-                    {
-                        <span>@Model.Year</span>
-                    }
-                </small>
-                
-                <small class="text-muted d-block">
-                    @if (!string.IsNullOrEmpty(Model.Director))
-                    {
-                        <span>@Model.Director</span>
-                    }
-                    @if (!string.IsNullOrEmpty(Model.Author))
-                    {
-                        <span>@Model.Author</span>
-                    }
-                </small>
-
-                @if (Model.RatingCount > 0)
-                {
-                    <small class="text-muted d-block mt-1">
-                        <i class="bi bi-people-fill me-1"></i>
-                        @Model.RatingCount oy
-                    </small>
-                }
-            </div>
         </div>
     </a>
 </div>
