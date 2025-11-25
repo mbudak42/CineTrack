@@ -1,31 +1,29 @@
-using System.Diagnostics;
+using CineTrack.MvcUI.Services;
 using Microsoft.AspNetCore.Mvc;
-using CineTrack.MvcUI.Models;
 
 namespace CineTrack.MvcUI.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger;
+    private readonly ApiService _api;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(ApiService api)
     {
-        _logger = logger;
+        _api = api;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View();
-    }
+        // Eğer kullanıcı giriş yapmamışsa basit bir karşılama sayfası göster
+        var token = HttpContext.Session.GetString("token");
+        
+        if (string.IsNullOrEmpty(token))
+        {
+            return View(new List<dynamic>());
+        }
 
-    public IActionResult Privacy()
-    {
-        return View();
-    }
-
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        // Feed verilerini çek
+        var feed = await _api.GetAsync<List<dynamic>>("feed");
+        return View(feed ?? new List<dynamic>());
     }
 }

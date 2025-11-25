@@ -1,0 +1,67 @@
+@model ContentCardDto
+
+<div class="card h-100 content-card">
+    <a asp-controller="Content" asp-action="Detail" asp-route-type="@Model.ContentType" asp-route-id="@Model.Id" class="text-decoration-none">
+        <!-- Poster/Kapak -->
+        <div class="card-img-wrapper position-relative">
+            <img src="@(Model.CoverUrl ?? "/images/placeholder-poster.jpg")" 
+                 class="card-img-top" 
+                 alt="@Model.Title">
+
+            <!-- İçerik Türü Badge -->
+            <span class="badge position-absolute top-0 end-0 m-2 @(Model.ContentType == "movie" ? "bg-danger" : "bg-info")">
+                <i class="bi @(Model.ContentType == "movie" ? "bi-film" : "bi-book") me-1"></i>
+                @(Model.ContentType == "movie" ? "Film" : "Kitap")
+            </span>
+        </div>
+
+        <!-- İçerik Bilgileri -->
+        <div class="card-body p-2">
+            <h6 class="card-title text-dark mb-1" title="@Model.Title">
+                @(Model.Title.Length > 50 ? Model.Title.Substring(0, 47) + "..." : Model.Title)
+            </h6>
+        </div>
+    </a>
+</div>
+
+<style>
+    .content-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+        cursor: pointer;
+        border: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .content-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+
+    .content-card .card-img-wrapper {
+        overflow: hidden;
+        aspect-ratio: 2/3;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .content-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s;
+    }
+
+    .content-card:hover img {
+        transform: scale(1.05);
+    }
+
+    .content-card .card-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        line-height: 1.2;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+</style>

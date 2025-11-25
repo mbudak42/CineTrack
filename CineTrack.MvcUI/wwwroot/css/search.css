@@ -1,0 +1,113 @@
+/* Arama Sayfası Stilleri */
+
+.search-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    padding: 2rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.search-section h1 {
+    color: white;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+.search-section .input-group-text {
+    background: white;
+    border: none;
+    border-radius: 10px 0 0 10px;
+}
+
+.search-section .form-control,
+.search-section .form-select {
+    border: none;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+}
+
+.search-section .form-control:focus,
+.search-section .form-select:focus {
+    box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.3);
+}
+
+.search-section .btn-primary {
+    background: #ff6b6b;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.search-section .btn-primary:hover {
+    background: #ee5a5a;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+}
+
+.search-section .form-label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: white;
+}
+
+/* Showcase Sections */
+.showcase-section {
+    margin-top: 3rem;
+}
+
+.showcase-section h2 {
+    font-weight: 700;
+    color: #2d3748;
+    border-bottom: 3px solid #667eea;
+    padding-bottom: 0.5rem;
+    display: inline-block;
+}
+
+/* Responsive Tasarım */
+@media (max-width: 768px) {
+    .search-section {
+        padding: 1.5rem;
+    }
+    
+    .search-section h1 {
+        font-size: 1.75rem;
+    }
+    
+    .showcase-section h2 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Animasyonlar */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.results-section,
+.showcase-section {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+/* Bootstrap Icon Renkler */
+.bi-fire {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}

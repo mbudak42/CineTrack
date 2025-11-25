@@ -1,51 +1,48 @@
+@model List<dynamic>
 @{
-    ViewData["Title"] = "Ana Sayfa - Sosyal Kütüphane";
+    ViewData["Title"] = "Ana Sayfa";
 }
 
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewData["Title"]</title>
+<div class="text-center mb-5">
+    <h1 class="display-4">🎬 CineTrack'e Hoş Geldiniz</h1>
+    <p class="lead">Film ve kitaplarınızı takip edin, paylaşın!</p>
+</div>
 
-    <!-- Stil dosyası -->
-    <link rel="stylesheet" href="~/css/index.css" />
-</head>
-<body>
-    <header class="header">
-        <div class="header-content">
-            <a href="/" class="logo">📚 Sosyal Kütüphane</a>
-            <nav class="nav">
-                <a href="/ana-sayfa">Ana Sayfa 🏠</a>
-                <a href="/kesif">Keşfet 🔍</a>
-                <a href="/profil">Profilim 👤</a>
-            </nav>
-        </div>
-    </header>
-
-    <div class="container">
-        <div class="page-header">
-            <h1 class="page-title">Akış</h1>
-        </div>
-
-        <div class="filter-tabs">
-            <button class="filter-tab active" onclick="filterFeed('all')">Tümü</button>
-            <button class="filter-tab" onclick="filterFeed('rating')">Puanlamalar</button>
-            <button class="filter-tab" onclick="filterFeed('review')">Yorumlar</button>
-            <button class="filter-tab" onclick="filterFeed('list')">Liste Eklemeleri</button>
-        </div>
-
-        <div class="feed" id="feedContainer">
-            <!-- Burada örnek aktiviteler dinamik olarak Razor ile gelecek -->
-        </div>
-
-        <div class="load-more">
-            <button class="load-more-btn" onclick="loadMore()">Daha Fazla Yükle</button>
-        </div>
+@if (Context.Session.GetString("token") == null)
+{
+    <div class="alert alert-info text-center">
+        <strong>Merhaba!</strong> Devam etmek için lütfen <a asp-controller="Auth" asp-action="Login" class="alert-link">giriş yapın</a> 
+        veya <a asp-controller="Auth" asp-action="Register" class="alert-link">kayıt olun</a>.
     </div>
-
-    <!-- JS dosyası -->
-    <script src="~/js/index.js"></script>
-</body>
-</html>
+}
+else
+{
+    <h3>Takip Ettiklerinizin Aktiviteleri</h3>
+    
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-secondary">
+            Henüz aktivite yok. Başlamak için kullanıcıları takip edin!
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var item in Model)
+            {
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">@item.username</h5>
+                            <p class="card-text">
+                                <strong>@item.actionType</strong> yaptı<br />
+                                <em>@item.targetTitle</em>
+                            </p>
+                            <small class="text-muted">@item.createdAt</small>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+}

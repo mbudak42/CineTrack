@@ -1,0 +1,193 @@
+@model SearchViewModel
+@{
+    ViewData["Title"] = "Ara & Keşfet";
+}
+
+<div class="container py-4">
+    <!-- Arama Bölümü -->
+    <div class="search-section mb-5">
+        <h1 class="mb-4">Ara & Keşfet</h1>
+        
+        <form method="get" asp-action="Index" id="searchForm">
+            <!-- Arama Çubuğu -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-8">
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" 
+                               class="form-control" 
+                               name="query" 
+                               value="@Model.Query"
+                               placeholder="Film veya kitap ara..."
+                               id="searchInput">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        <i class="bi bi-search me-2"></i>Ara
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filtreler -->
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">İçerik Türü</label>
+                    <select class="form-select" name="contentType" id="contentType">
+                        <option value="all" selected="@(Model.ContentType == "all")">Tümü</option>
+                        <option value="movie" selected="@(Model.ContentType == "movie")">Filmler</option>
+                        <option value="book" selected="@(Model.ContentType == "book")">Kitaplar</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Tür</label>
+                    <select class="form-select" name="genre" id="genre">
+                        <option value="">Tüm Türler</option>
+                        @foreach (var genre in Model.AvailableGenres)
+                        {
+                            <option value="@genre" selected="@(Model.Genre == genre)">@genre</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Yıl</label>
+                    <input type="number" 
+                           class="form-control" 
+                           name="year" 
+                           value="@Model.Year"
+                           placeholder="Örn: 2024"
+                           min="1900"
+                           max="@DateTime.Now.Year">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Minimum Puan</label>
+                    <select class="form-select" name="minRating" id="minRating">
+                        <option value="">Tüm Puanlar</option>
+                        <option value="9" selected="@(Model.MinRating == 9)">9+ ⭐</option>
+                        <option value="8" selected="@(Model.MinRating == 8)">8+ ⭐</option>
+                        <option value="7" selected="@(Model.MinRating == 7)">7+ ⭐</option>
+                        <option value="6" selected="@(Model.MinRating == 6)">6+ ⭐</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <button type="submit" class="btn btn-outline-primary me-2">
+                    <i class="bi bi-funnel me-1"></i>Filtrele
+                </button>
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle me-1"></i>Filtreleri Temizle
+                </a>
+            </div>
+        </form>
+    </div>
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger">@ViewBag.Error</div>
+    }
+
+    <!-- Arama Sonuçları -->
+    @if (!string.IsNullOrWhiteSpace(Model.Query))
+    {
+        <div class="results-section">
+            <h2 class="mb-4">
+                "@Model.Query" için sonuçlar 
+                <span class="text-muted fs-5">(@Model.SearchResults.Count)</span>
+            </h2>
+
+            @if (Model.SearchResults.Any())
+            {
+                <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-3">
+                    @foreach (var content in Model.SearchResults)
+                    {
+                        <div class="col">
+                            @await Html.PartialAsync("_ContentCard", content)
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Arama kriterlerinize uygun içerik bulunamadı.
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <!-- Vitrinler (Arama yapılmadığında) -->
+        
+        <!-- En Yüksek Puanlılar -->
+        @if (Model.TopRated.Any())
+        {
+            <section class="showcase-section mb-5">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2>
+                        <i class="bi bi-star-fill text-warning me-2"></i>
+                        En Yüksek Puanlılar
+                    </h2>
+                </div>
+                
+                <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-3">
+                    @foreach (var content in Model.TopRated)
+                    {
+                        <div class="col">
+                            @await Html.PartialAsync("_ContentCard", content)
+                        </div>
+                    }
+                </div>
+            </section>
+        }
+
+        <!-- En Popülerler -->
+        @if (Model.MostPopular.Any())
+        {
+            <section class="showcase-section mb-5">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2>
+                        <i class="bi bi-fire text-danger me-2"></i>
+                        En Popülerler
+                    </h2>
+                </div>
+                
+                <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-3">
+                    @foreach (var content in Model.MostPopular)
+                    {
+                        <div class="col">
+                            @await Html.PartialAsync("_ContentCard", content)
+                        </div>
+                    }
+                </div>
+            </section>
+        }
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Filtre değiştiğinde otomatik arama
+        document.querySelectorAll('#contentType, #genre, #minRating').forEach(element => {
+            element.addEventListener('change', function() {
+                if (document.getElementById('searchInput').value) {
+                    document.getElementById('searchForm').submit();
+                }
+            });
+        });
+
+        // Enter tuşu ile arama
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('searchForm').submit();
+            }
+        });
+    </script>
+}
