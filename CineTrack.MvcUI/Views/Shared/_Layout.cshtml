@@ -64,36 +64,31 @@
 					}
 					else
 					{
-						var username = Context.Session.GetString("username") ?? "Kullanıcı";
-						var avatarUrl = Context.Session.GetString("avatarUrl") ?? "none.png";
-						var fullAvatarPath = avatarUrl.StartsWith("http") ? avatarUrl : $"/images/{avatarUrl}";
+						<li class="nav-item dropdown d-flex align-items-center">
+							@{
+								// Session'dan avatarı çek
+								var avatarUrl = Context.Session.GetString("avatarUrl");
 
-						<li class="nav-item dropdown profile-dropdown">
-							<a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
-								data-bs-toggle="dropdown" aria-expanded="false">
-								<img src="@fullAvatarPath" alt="@username" class="profile-avatar me-2"
-									onerror="this.src='/images/none.jpg'">
+								// Eğer avatarUrl boş veya null ise varsayılan görseli kullan
+								var displayImage = string.IsNullOrEmpty(avatarUrl) ? "/images/none.png" : avatarUrl;
+
+								var username = Context.Session.GetString("username");
+							}
+
+							<a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button"
+								data-bs-toggle="dropdown">
+								<img src="@displayImage" alt="@username" class="rounded-circle border"
+									style="width: 32px; height: 32px; object-fit: cover;" />
 								<span>@username</span>
 							</a>
+
 							<ul class="dropdown-menu dropdown-menu-end">
-								<li>
-									<a class="dropdown-item" asp-controller="Profile" asp-action="Index">
-										<i class="bi bi-person"></i> Profilim
-									</a>
-								</li>
-								<li>
-									<a class="dropdown-item" asp-controller="Profile" asp-action="Settings">
-										<i class="bi bi-gear"></i> Ayarlar
-									</a>
-								</li>
+								<li><a class="dropdown-item" asp-controller="User" asp-action="Profile">Profilim</a></li>
 								<li>
 									<hr class="dropdown-divider">
 								</li>
-								<li>
-									<a class="dropdown-item" asp-controller="Auth" asp-action="Logout">
-										<i class="bi bi-box-arrow-right"></i> Çıkış Yap
-									</a>
-								</li>
+								<li><a class="dropdown-item text-danger" asp-controller="Auth" asp-action="Logout">Çıkış
+										Yap</a></li>
 							</ul>
 						</li>
 					}
