@@ -22,7 +22,7 @@ public class AuthController : Controller
     {
         if (!ModelState.IsValid) return View(model);
 
-        var json = await _api.PostAsync("auth/register", model);
+        var json = await _api.PostAsync("api/auth/register", model);
         
         if (json == null)
         {
@@ -54,7 +54,7 @@ public class AuthController : Controller
     {
         if (!ModelState.IsValid) return View(model);
 
-        var json = await _api.PostAsync("auth/login", model);
+        var json = await _api.PostAsync("api/auth/login", model);
         
         if (json == null)
         {
