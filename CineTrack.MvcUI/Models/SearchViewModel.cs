@@ -11,7 +11,7 @@ public class SearchViewModel
     
     public string? Genre { get; set; }
     
-    public int? Year { get; set; }
+    public string? Year { get; set; }
     
     public double? MinRating { get; set; }
     
