@@ -33,8 +33,7 @@ public class FeedService
 			.Select(f => f.FollowedId)
 			.ToListAsync();
 
-		if (followingIds.Count == 0)
-			return new List<ActivityDto>();
+		followingIds.Add(userId);
 
 		// Bu kişilerin aktivitelerini çek
 		var activities = await _context.ActivityLogs

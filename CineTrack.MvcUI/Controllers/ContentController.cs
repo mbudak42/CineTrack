@@ -106,6 +106,26 @@ public class ContentController : Controller
 			}
 		}
 
+		try
+		{
+			// ReviewResponseDto veya ReviewDto kullanabilirsiniz, API ReviewDto dönüyordu.
+			var reviews = await _api.GetAsync<List<CineTrack.Shared.DTOs.ReviewDto>>($"api/review/content/{id}");
+
+			if (reviews != null)
+			{
+				content.Comments = reviews.Select(r => new CommentDto
+				{
+					UserName = r.Username,
+					Text = r.Text,
+					CreatedAt = r.CreatedAt
+				}).ToList();
+			}
+		}
+		catch
+		{
+			// Yorum çekilemezse sayfa patlamasın, boş liste kalsın 
+		}
+
 		return View(content);
 	}
 
@@ -177,5 +197,45 @@ public class ContentController : Controller
 		{
 			return Json(new { success = false, message = "Hata oluştu: " + ex.Message });
 		}
+	}
+
+	[HttpPost]
+	public async Task<IActionResult> AddComment(string contentId, string text)
+	{
+		if (HttpContext.Session.GetString("token") == null)
+		{
+			return Json(new { success = false, message = "Lütfen önce giriş yapın." });
+		}
+
+		if (string.IsNullOrWhiteSpace(text))
+		{
+			return Json(new { success = false, message = "Yorum boş olamaz." });
+		}
+
+		var payload = new CineTrack.Shared.DTOs.ReviewCreateDto
+		{
+			ContentId = contentId,
+			ReviewText = text
+		};
+
+		// ReviewController'daki AddOrUpdateReview endpoint'i 'api/review' adresinde
+		// Ancak o metot ReviewDto bekliyor, CreateDto değil. 
+		// Bu yüzden API tarafındaki ReviewController veya DTO uyumunu kontrol edelim.
+		// Mevcut ReviewController [FromBody] ReviewDto bekliyor.
+		// O yüzden payload'ı ona uyduruyoruz:
+
+		var apiPayload = new CineTrack.Shared.DTOs.ReviewDto
+		{
+			ContentId = contentId,
+			Text = text
+			// UserId token'dan alınacak, Id otomatik artacak
+		};
+
+		var response = await _api.PostAsync("api/review", apiPayload);
+
+		if (response != null)
+			return Json(new { success = true, message = "Yorumunuz eklendi." });
+
+		return Json(new { success = false, message = "Yorum eklenirken hata oluştu." });
 	}
 }

@@ -381,12 +381,32 @@
 	}
 
 	function submitComment(id, type) {
-		var comment = document.getElementById("newComment").value;
-		if (!comment) return;
+		var commentText = document.getElementById("newComment").value;
+		if (!commentText) {
+			alert("Lütfen bir yorum yazın.");
+			return;
+		}
 
-		// Yorum API çağrısı (Simülasyon)
-		console.log("Comment gönder:", id, type, comment);
-		alert("Yorumunuz alındı (Demo).");
-		document.getElementById("newComment").value = "";
+		var formData = new FormData();
+		formData.append('contentId', id);
+		formData.append('text', commentText);
+
+		fetch('/Content/AddComment', {
+			method: 'POST',
+			body: formData
+		})
+			.then(res => res.json())
+			.then(data => {
+				if (data.success) {
+					// Başarılıysa sayfayı yenile ki yeni yorum ve aktivite görünsün
+					location.reload();
+				} else {
+					alert(data.message);
+				}
+			})
+			.catch(err => {
+				console.error(err);
+				alert("Bir hata oluştu.");
+			});
 	}
 </script>
