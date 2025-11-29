@@ -1,5 +1,4 @@
-namespace CineTrack.WebAPI.DTOs;
-
+namespace CineTrack.Shared.DTOs;
 public class ReviewResponseDto
 {
 	public int Id { get; set; }

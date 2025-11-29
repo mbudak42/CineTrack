@@ -1,5 +1,4 @@
-namespace CineTrack.WebAPI.DTOs;
-
+namespace CineTrack.Shared.DTOs;
 public class ActivityDto
 {
 	public int UserId { get; set; }

@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CineTrack.DataAccess", "Cin
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CineTrack.MvcUI", "CineTrack.MvcUI\CineTrack.MvcUI.csproj", "{1E3EE5AE-4EC1-4DAD-A20C-92D6AD044BD5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CineTrack.Shared", "CineTrack.Shared\CineTrack.Shared.csproj", "{30C35EA9-B7E9-4648-BC84-C5B91D8BD753}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,18 @@ Global
 		{1E3EE5AE-4EC1-4DAD-A20C-92D6AD044BD5}.Release|x64.Build.0 = Release|Any CPU
 		{1E3EE5AE-4EC1-4DAD-A20C-92D6AD044BD5}.Release|x86.ActiveCfg = Release|Any CPU
 		{1E3EE5AE-4EC1-4DAD-A20C-92D6AD044BD5}.Release|x86.Build.0 = Release|Any CPU
+		{30C35EA9-B7E9-4648-BC84-C5B91D8BD753}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30C35EA9-B7E9-4648-BC84-C5B91D8BD753}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30C35EA9-B7E9-4648-BC84-C5B91D8BD753}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{30C35EA9-B7E9-4648-BC84-C5B91D8BD753}.Debug|x64.Build.0 = Debug|Any CPU
+		{30C35EA9-B7E9-4648-BC84-C5B91D8BD753}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{30C35EA9-B7E9-4648-BC84-C5B91D8BD753}.Debug|x86.Build.0 = Debug|Any CPU
+		{30C35EA9-B7E9-4648-BC84-C5B91D8BD753}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30C35EA9-B7E9-4648-BC84-C5B91D8BD753}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30C35EA9-B7E9-4648-BC84-C5B91D8BD753}.Release|x64.ActiveCfg = Release|Any CPU
+		{30C35EA9-B7E9-4648-BC84-C5B91D8BD753}.Release|x64.Build.0 = Release|Any CPU
+		{30C35EA9-B7E9-4648-BC84-C5B91D8BD753}.Release|x86.ActiveCfg = Release|Any CPU
+		{30C35EA9-B7E9-4648-BC84-C5B91D8BD753}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

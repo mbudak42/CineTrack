@@ -1,5 +1,4 @@
-namespace CineTrack.WebAPI.DTOs;
-
+namespace CineTrack.Shared.DTOs;
 public class AuthResponseDto
 {
 	public string Token { get; set; }

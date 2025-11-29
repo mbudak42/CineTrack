@@ -1,4 +1,4 @@
-public class ContentDto
+namespace CineTrack.Shared.DTOs;public class ContentDto
 {
 	public string Id { get; set; }
 	public string Title { get; set; }

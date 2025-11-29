@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CineTrack.DataAccess\CineTrack.DataAccess.csproj" />
+    <ProjectReference Include="..\CineTrack.Shared\CineTrack.Shared.csproj" />
   </ItemGroup>
 
 </Project>

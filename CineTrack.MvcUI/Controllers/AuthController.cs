@@ -50,13 +50,13 @@ public class AuthController : Controller
 		// 3. Kullanıcı bilgilerini (username, avatarUrl) Session'a kaydet
 		if (root.TryGetProperty("user", out var userElement))
 		{
+			var id = userElement.GetProperty("id").GetInt32();
 			var username = userElement.GetProperty("username").GetString();
 			var avatarUrl = userElement.GetProperty("avatarUrl").GetString(); // Kayıtta genelde null döner
 
+			HttpContext.Session.SetInt32("userId", id);
 			HttpContext.Session.SetString("username", username ?? "");
-
-			// AvatarUrl null olsa bile boş string olarak kaydediyoruz
-			// _Layout.cshtml tarafında boşsa "none.png" gösterilecek
+			//> AvatarUrl null olsa bile boş string olarak kaydediyoruz _Layout.cshtml tarafında boşsa "none.png" gösterilecek
 			HttpContext.Session.SetString("avatarUrl", avatarUrl ?? "");
 		}
 
@@ -99,13 +99,12 @@ public class AuthController : Controller
 		// 2. Kullanıcı bilgilerini al ve Session'a kaydet
 		if (root.TryGetProperty("user", out var userElement))
 		{
+			var id = userElement.GetProperty("id").GetInt32();
 			var username = userElement.GetProperty("username").GetString();
-			var avatarUrl = userElement.GetProperty("avatarUrl").GetString(); // Null olabilir
+			var avatarUrl = userElement.GetProperty("avatarUrl").GetString();
 
-			// Session'a yaz
+			HttpContext.Session.SetInt32("userId", id);
 			HttpContext.Session.SetString("username", username ?? "");
-
-			// Eğer avatarUrl null ise boş string kaydet, kontrolü View'da yapacağız
 			HttpContext.Session.SetString("avatarUrl", avatarUrl ?? "");
 		}
 

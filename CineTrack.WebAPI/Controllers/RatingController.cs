@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using CineTrack.WebAPI.DTOs;
+using CineTrack.Shared.DTOs;
 using CineTrack.WebAPI.Services;
 
 namespace CineTrack.WebAPI.Controllers;

@@ -1,5 +1,5 @@
 using CineTrack.DataAccess;
-using CineTrack.WebAPI.DTOs;
+using CineTrack.Shared.DTOs;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 

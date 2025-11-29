@@ -1,6 +1,6 @@
 using CineTrack.DataAccess;
 using CineTrack.DataAccess.Entities;
-using CineTrack.WebAPI.DTOs;
+using CineTrack.Shared.DTOs;
 using CineTrack.WebAPI.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;

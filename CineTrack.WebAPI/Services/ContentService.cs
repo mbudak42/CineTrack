@@ -1,7 +1,7 @@
 using System.Text.Json;
 using CineTrack.DataAccess;
 using CineTrack.DataAccess.Entities;
-using CineTrack.WebAPI.DTOs;
+using CineTrack.Shared.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace CineTrack.WebAPI.Services;
