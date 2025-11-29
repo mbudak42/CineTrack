@@ -4,6 +4,18 @@ using CineTrack.WebAPI.Services;
 
 namespace CineTrack.WebAPI.Controllers;
 
+// Parametreleri karşılamak için DTO'lar
+public class CreateListDto
+{
+	public string Name { get; set; }
+	public string? Description { get; set; }
+}
+
+public class AddContentDto
+{
+	public string ContentId { get; set; }
+}
+
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
@@ -16,13 +28,12 @@ public class UserListController : ControllerBase
 		_listService = listService;
 	}
 
-	// 1) Liste oluştur
+	// 1) Liste oluştur (GÜNCELLENDİ)
 	[HttpPost]
-	public async Task<IActionResult> CreateList([FromBody] dynamic body)
+	public async Task<IActionResult> CreateList([FromBody] CreateListDto body)
 	{
-		string name = body.name;
-		string? desc = body.description;
-		var list = await _listService.CreateListAsync(name, desc);
+		// Artık body.Name diyerek güvenle erişebiliriz
+		var list = await _listService.CreateListAsync(body.Name, body.Description);
 		return Ok(list);
 	}
 
@@ -44,14 +55,14 @@ public class UserListController : ControllerBase
 		return Ok(list);
 	}
 
-	// 4) Listeye içerik ekle
+	// 4) Listeye içerik ekle (GÜNCELLENDİ)
 	[HttpPost("{id}/add")]
-	public async Task<IActionResult> AddContent(int id, [FromBody] dynamic body)
+	public async Task<IActionResult> AddContent(int id, [FromBody] AddContentDto body)
 	{
-		string contentId = body.contentId;
-		bool result = await _listService.AddContentToListAsync(id, contentId);
+		// Artık body.ContentId diyerek güvenle erişebiliriz
+		bool result = await _listService.AddContentToListAsync(id, body.ContentId);
 		if (!result)
-			return BadRequest(new { message = "Icerik eklenemedi." });
+			return BadRequest(new { message = "Icerik eklenemedi veya zaten listede." });
 
 		return Ok(new { message = "Icerik listeye eklendi." });
 	}

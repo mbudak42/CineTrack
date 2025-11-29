@@ -58,19 +58,25 @@
 					onclick="submitRating('@Model.Id', '@Model.ContentType')">Gönder</button>
 			</div>
 
-			<div class="mb-3">
+			<div class="mb-3 d-grid gap-2 d-md-block">
 				@if (Model.ContentType == "movie")
 				{
-					<button class="btn btn-success">İzledim</button>
-					<button class="btn btn-warning">İzlenecek</button>
+					<button class="btn btn-success" onclick="addToList('@Model.Id', 'İzlediklerim')">
+						<i class="bi bi-check-circle-fill"></i> İzledim
+					</button>
+					<button class="btn btn-warning" onclick="addToList('@Model.Id', 'İzlenecekler')">
+						<i class="bi bi-bookmark-plus-fill"></i> İzlenecekler
+					</button>
 				}
 				else
 				{
-					<button class="btn btn-success">Okudum</button>
-					<button class="btn btn-warning">Okunacak</button>
+					<button class="btn btn-success" onclick="addToList('@Model.Id', 'Okuduklarım')">
+						<i class="bi bi-check-circle-fill"></i> Okudum
+					</button>
+					<button class="btn btn-warning" onclick="addToList('@Model.Id', 'Okunacaklar')">
+						<i class="bi bi-bookmark-plus-fill"></i> Okunacaklar
+					</button>
 				}
-
-				<button class="btn btn-info">Özel Listeye Ekle</button>
 			</div>
 		</div>
 	</div>
@@ -103,6 +109,32 @@
 </div>
 
 <script>
+	function addToList(contentId, listName) {
+		// Butona basıldığında kullanıcıya bilgi verelim (basitçe)
+		// İsterseniz burada loading ikonu gösterebilirsiniz.
+
+		const formData = new FormData();
+		formData.append('contentId', contentId);
+		formData.append('listName', listName);
+
+		fetch('/Content/AddToList', {
+			method: 'POST',
+			body: formData
+		})
+			.then(response => response.json())
+			.then(data => {
+				if (data.success) {
+					alert(data.message); // Başarılı mesajı
+				} else {
+					alert(data.message); // Hata mesajı
+				}
+			})
+			.catch(error => {
+				console.error('Error:', error);
+				alert("Bir hata oluştu.");
+			});
+	}
+
 	function submitRating(id, type) {
 		var rating = document.getElementById("userRating").value;
 		console.log("Rating gönder:", id, type, rating);
