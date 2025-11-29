@@ -35,7 +35,15 @@ public class ApiService
 		LoadTokenFromSession();
 
 		var response = await _client.GetAsync(endpoint);
-		if (!response.IsSuccessStatusCode) return default;
+
+		// GÜNCELLEME: Hata varsa konsola yazdır
+		if (!response.IsSuccessStatusCode)
+		{
+			var errorContent = await response.Content.ReadAsStringAsync();
+			Console.WriteLine($"❌ API GET Hatası [{endpoint}]: {response.StatusCode}");
+			Console.WriteLine($"📄 Detay: {errorContent}");
+			return default;
+		}
 
 		var json = await response.Content.ReadAsStringAsync();
 		return JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions
