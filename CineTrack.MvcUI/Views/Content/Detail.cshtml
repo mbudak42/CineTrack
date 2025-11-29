@@ -67,6 +67,9 @@
 					<button class="btn btn-warning" onclick="addToList('@Model.Id', 'İzlenecekler')">
 						<i class="bi bi-bookmark-plus-fill"></i> İzlenecekler
 					</button>
+					<button class="btn btn-info" onclick="openCustomListModal()">
+						<i class="bi bi-list-stars"></i> Özel Listeye Ekle
+					</button>
 				}
 				else
 				{
@@ -75,6 +78,9 @@
 					</button>
 					<button class="btn btn-warning" onclick="addToList('@Model.Id', 'Okunacaklar')">
 						<i class="bi bi-bookmark-plus-fill"></i> Okunacaklar
+					</button>
+					<button class="btn btn-info" onclick="openCustomListModal()">
+						<i class="bi bi-list-stars"></i> Özel Listeye Ekle
 					</button>
 				}
 			</div>
@@ -106,9 +112,91 @@
 		<button class="btn btn-primary mt-2" onclick="submitComment('@Model.Id', '@Model.ContentType')">Gönder</button>
 	</div>
 
+	<div class="modal fade" id="addCustomListModal" tabindex="-1">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Özel Listeye Ekle</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body">
+					<div id="loadingLists" class="text-center">
+						<div class="spinner-border text-primary" role="status"></div>
+					</div>
+					<div id="listsContainer" class="list-group">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
 </div>
 
 <script>
+	// Listeleri getir ve Modalı aç
+	function openCustomListModal() {
+		var modal = new bootstrap.Modal(document.getElementById('addCustomListModal'));
+		modal.show();
+
+		// Listeleri temizle ve loading göster
+		document.getElementById('listsContainer').innerHTML = '';
+		document.getElementById('loadingLists').style.display = 'block';
+
+		fetch('/UserList/GetMyLists')
+			.then(res => res.json())
+			.then(lists => {
+				document.getElementById('loadingLists').style.display = 'none';
+				var container = document.getElementById('listsContainer');
+
+				if (lists.length === 0) {
+					container.innerHTML = '<div class="alert alert-warning">Henüz özel bir listeniz yok. Profilinizden oluşturabilirsiniz.</div>';
+					return;
+				}
+
+				// Temel listeleri (İzlediklerim vb.) filtrele, sadece özelleri göster
+				var customLists = lists.filter(l =>
+					l.name !== 'İzlediklerim' &&
+					l.name !== 'İzlenecekler' &&
+					l.name !== 'Okuduklarım' &&
+					l.name !== 'Okunacaklar'
+				);
+
+				if (customLists.length === 0) {
+					container.innerHTML = '<div class="alert alert-info">Sadece varsayılan listeleriniz var. Yeni bir özel liste oluşturun.</div>';
+					return;
+				}
+
+				customLists.forEach(list => {
+					var btn = document.createElement('button');
+					btn.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
+					btn.innerHTML = `<span>${list.name}</span> <span class="badge bg-secondary rounded-pill">${list.contents ? list.contents.length : 0}</span>`;
+					btn.onclick = function () { addToCustomList(list.id); };
+					container.appendChild(btn);
+				});
+			});
+	}
+
+	function addToCustomList(listId) {
+		var contentId = '@Model.Id';
+
+		var formData = new FormData();
+		formData.append('listId', listId);
+		formData.append('contentId', contentId);
+
+		fetch('/UserList/AddContent', {
+			method: 'POST',
+			body: formData
+		})
+			.then(res => res.json())
+			.then(data => {
+				alert(data.message);
+				// Modalı kapat
+				var modalEl = document.getElementById('addCustomListModal');
+				var modal = bootstrap.Modal.getInstance(modalEl);
+				modal.hide();
+			});
+	}
+
 	function addToList(contentId, listName) {
 		// Butona basıldığında kullanıcıya bilgi verelim (basitçe)
 		// İsterseniz burada loading ikonu gösterebilirsiniz.

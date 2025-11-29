@@ -34,7 +34,7 @@
 							data-bs-target="#editProfileModal">
 							<i class="bi bi-pencil"></i> Profili Düzenle
 						</button>
-						<button class="btn btn-success w-100">
+						<button class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#createListModal">
 							<i class="bi bi-plus-lg"></i> Yeni Liste Oluştur
 						</button>
 					}
@@ -128,7 +128,9 @@
 									<h5 class="card-title">@list.Name</h5>
 									<p class="card-text text-muted">@list.Description</p>
 									<p class="card-text"><small>@(list.Contents?.Count ?? 0) içerik</small></p>
-									<a href="#" class="btn btn-sm btn-outline-primary">Listeyi Gör</a>
+									<button class="btn btn-sm btn-outline-primary" onclick="showListContents(@list.Id)">
+										<i class="bi bi-eye"></i> Listeyi Gör
+									</button>
 								</div>
 							</div>
 						</div>
@@ -170,6 +172,35 @@
 
 @if (Model.IsOwner)
 {
+	<div class="modal fade" id="createListModal" tabindex="-1">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Yeni Liste Oluştur</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body">
+					<form id="createListForm">
+						<div class="mb-3">
+							<label class="form-label">Liste Adı</label>
+							<input type="text" class="form-control" id="listName" required
+								placeholder="Örn: En İyi Korku Filmleri">
+						</div>
+						<div class="mb-3">
+							<label class="form-label">Açıklama</label>
+							<textarea class="form-control" id="listDesc" rows="3"
+							placeholder="Bu listenin amacı ne?"></textarea>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+					<button type="button" class="btn btn-primary" onclick="submitCreateList()">Oluştur</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<div class="modal fade" id="editProfileModal" tabindex="-1">
 		<div class="modal-dialog">
 			<div class="modal-content">
@@ -198,5 +229,110 @@
 	</div>
 }
 
-@section Scripts {
-}
+<div class="modal fade" id="listDetailModal" tabindex="-1">
+	<div class="modal-dialog modal-lg modal-dialog-scrollable">
+		<div class="modal-content">
+			<div class="modal-header">
+				<div>
+					<h5 class="modal-title" id="detailModalTitle">Liste Adı</h5>
+					<small class="text-muted" id="detailModalDesc">Açıklama</small>
+				</div>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body">
+				<div id="detailLoading" class="text-center py-4">
+					<div class="spinner-border text-primary" role="status"></div>
+				</div>
+
+				<div id="listContentsContainer" class="row row-cols-2 row-cols-md-3 g-3"></div>
+
+				<div id="detailEmpty" class="alert alert-info text-center" style="display:none;">
+					Bu listede henüz içerik yok.
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+
+	function showListContents(listId) {
+		// Modalı aç
+		var modal = new bootstrap.Modal(document.getElementById('listDetailModal'));
+		modal.show();
+
+		// Yükleniyor durumuna getir
+		document.getElementById('detailLoading').style.display = 'block';
+		document.getElementById('listContentsContainer').innerHTML = '';
+		document.getElementById('detailEmpty').style.display = 'none';
+		document.getElementById('detailModalTitle').innerText = 'Yükleniyor...';
+		document.getElementById('detailModalDesc').innerText = '';
+
+		// Veriyi çek
+		fetch('/UserList/GetListDetails/' + listId)
+			.then(res => res.json())
+			.then(response => {
+				document.getElementById('detailLoading').style.display = 'none';
+
+				if (!response.success) {
+					alert(response.message);
+					modal.hide();
+					return;
+				}
+
+				var list = response.data;
+				document.getElementById('detailModalTitle').innerText = list.name;
+				document.getElementById('detailModalDesc').innerText = list.description || '';
+
+				// İçerik yoksa uyarı göster
+				if (!list.contents || list.contents.length === 0) {
+					document.getElementById('detailEmpty').style.display = 'block';
+					return;
+				}
+
+				// İçerikleri listele
+				var container = document.getElementById('listContentsContainer');
+				list.contents.forEach(item => {
+					var cardHtml = `
+                            <div class="col">
+                                <div class="card h-100 shadow-sm">
+                                    <img src="${item.coverUrl || '/images/placeholder.jpg'}" class="card-img-top" 
+                                         style="aspect-ratio: 2/3; object-fit: cover;">
+                                    <div class="card-body p-2">
+                                        <h6 class="card-title text-truncate small mb-1" title="${item.title}">${item.title}</h6>
+                                        <a href="/Content/Detail?type=${item.contentType}&id=${item.id}" 
+                                           class="btn btn-xs btn-outline-secondary w-100 stretched-link">Detay</a>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+					container.innerHTML += cardHtml;
+				});
+			})
+			.catch(err => {
+				console.error(err);
+				alert("Liste detayları yüklenirken bir hata oluştu.");
+			});
+	}
+		
+	function submitCreateList() {
+		var name = document.getElementById('listName').value;
+		var desc = document.getElementById('listDesc').value;
+
+		if (!name) { alert("Lütfen bir isim girin."); return; }
+
+		var formData = new FormData();
+		formData.append('name', name);
+		formData.append('description', desc);
+
+		fetch('/UserList/Create', {
+			method: 'POST',
+			body: formData
+		})
+			.then(res => res.json())
+			.then(data => {
+				alert(data.message);
+				if (data.success) location.reload(); // Sayfayı yenile ki yeni liste görünsün
+			});
+	}
+</script>
