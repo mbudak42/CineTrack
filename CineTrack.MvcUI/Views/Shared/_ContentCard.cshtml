@@ -1,25 +1,29 @@
 @model ContentCardDto
 
-<div class="card h-100 content-card">
+<div class="card h-100 content-card position-relative">
     <a asp-controller="Content" asp-action="Detail" asp-route-type="@Model.ContentType" asp-route-id="@Model.Id" class="text-decoration-none">
-        <!-- Poster/Kapak -->
         <div class="card-img-wrapper position-relative">
-            <img src="@(Model.CoverUrl ?? "/images/placeholder-poster.jpg")" 
-                 class="card-img-top" 
-                 alt="@Model.Title">
-
-            <!-- İçerik Türü Badge -->
+            <img src="@(Model.CoverUrl ?? "/images/placeholder-poster.jpg")" class="card-img-top" alt="@Model.Title">
+            
             <span class="badge position-absolute top-0 end-0 m-2 @(Model.ContentType == "movie" ? "bg-danger" : "bg-info")">
                 <i class="bi @(Model.ContentType == "movie" ? "bi-film" : "bi-book") me-1"></i>
                 @(Model.ContentType == "movie" ? "Film" : "Kitap")
             </span>
+            
+            @* Not: Bu özelliğin çalışması için Search/Index sorgularının da UserRating'i doldurması gerekir. *@
+            @if (Model.GetType().GetProperty("UserRating") != null) 
+            {
+                 var userRating = (int?)Model.GetType().GetProperty("UserRating")?.GetValue(Model, null);
+                 if (userRating.HasValue && userRating > 0)
+                 {
+                     <span class="badge position-absolute bottom-0 start-0 m-2 bg-warning text-dark border border-white">
+                        <i class="bi bi-star-fill small"></i> @userRating
+                     </span>
+                 }
+            }
         </div>
-
-        <!-- İçerik Bilgileri -->
         <div class="card-body p-2">
-            <h6 class="card-title text-dark mb-1" title="@Model.Title">
-                @(Model.Title.Length > 50 ? Model.Title.Substring(0, 47) + "..." : Model.Title)
-            </h6>
+            <h6 class="card-title text-dark mb-1 text-truncate">@Model.Title</h6>
         </div>
     </a>
 </div>

@@ -1,6 +1,6 @@
 namespace CineTrack.MvcUI.Models;
 
-public class ContentDetailDto
+public class ContentViewModel
 {
     public string Id { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
@@ -19,6 +19,7 @@ public class ContentDetailDto
     // Puanlama
     public double? AverageRating { get; set; }
     public int RatingCount { get; set; }
+	public int CurrentUserRating { get; set; }
 
     // Kullanıcı yorumları
     public List<CommentDto> Comments { get; set; } = new();

@@ -67,4 +67,12 @@ public class RatingService
 		if (ratings.Count == 0) return 0;
 		return Math.Round(ratings.Average(r => r.RatingValue), 2);
 	}
+
+	public async Task<int> GetUserRatingAsync(int userId, string contentId)
+	{
+		var rating = await _context.Ratings
+			.FirstOrDefaultAsync(r => r.UserId == userId && r.ContentId == contentId);
+
+		return rating?.RatingValue ?? 0;
+	}
 }

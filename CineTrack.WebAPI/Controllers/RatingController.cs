@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using CineTrack.Shared.DTOs;
 using CineTrack.WebAPI.Services;
+using System.Security.Claims; // Eklendi
 
 namespace CineTrack.WebAPI.Controllers;
 
@@ -10,10 +11,12 @@ namespace CineTrack.WebAPI.Controllers;
 public class RatingController : ControllerBase
 {
 	private readonly RatingService _ratingService;
+	private readonly IHttpContextAccessor _http; // Eklendi
 
-	public RatingController(RatingService ratingService)
+	public RatingController(RatingService ratingService, IHttpContextAccessor http)
 	{
 		_ratingService = ratingService;
+		_http = http;
 	}
 
 	[Authorize]
@@ -32,5 +35,17 @@ public class RatingController : ControllerBase
 	{
 		double avg = await _ratingService.GetAverageAsync(contentId);
 		return Ok(new { average = avg });
+	}
+
+	[Authorize]
+	[HttpGet("my-rating/{contentId}")]
+	public async Task<IActionResult> GetMyRating(string contentId)
+	{
+		// Token'dan userId al
+		var userIdStr = _http.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+		if (string.IsNullOrEmpty(userIdStr)) return Ok(new { rating = 0 });
+
+		int userId = int.Parse(userIdStr);var rating = await _ratingService.GetUserRatingAsync(userId, contentId);
+		return Ok(new { rating = rating });
 	}
 }

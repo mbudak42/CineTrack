@@ -63,4 +63,30 @@ public class UserListController : Controller
 
 		return Json(new { success = true, data = listDetail });
 	}
+
+	[HttpPost]
+	public async Task<IActionResult> UpdateProfile(string bio, string avatarUrl)
+	{
+		var data = new { bio, avatarUrl };
+
+		// API'ye güncelleme isteği at
+		var response = await _api.PutAsync($"api/user/update", data);
+
+		if (response != null)
+		{
+			// API'den dönen güncel kullanıcı bilgisini al
+			using var doc = System.Text.Json.JsonDocument.Parse(response);
+			var root = doc.RootElement;
+
+			// Yeni AvatarUrl'i Session'a kaydet (Header resmi için)
+			if (root.TryGetProperty("avatarUrl", out var avatarProp))
+			{
+				var newAvatar = avatarProp.GetString();
+				HttpContext.Session.SetString("avatarUrl", newAvatar ?? "");
+			}
+		}
+
+		// Profil sayfasına geri dön
+		return RedirectToAction("Profile");
+	}
 }

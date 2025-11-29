@@ -4,6 +4,13 @@ using CineTrack.WebAPI.Services;
 
 namespace CineTrack.WebAPI.Controllers;
 
+// 1. DTO Tanımı (Sınıfın dışına veya içine ekleyebilirsiniz)
+public class UserUpdateDto
+{
+	public string? Bio { get; set; }
+	public string? AvatarUrl { get; set; }
+}
+
 [ApiController]
 [Route("api/[controller]")]
 public class UserController : ControllerBase
@@ -15,7 +22,7 @@ public class UserController : ControllerBase
 		_userService = userService;
 	}
 
-	// 1) Kullanıcı profili getir
+	// ... (GetProfile metodu aynı kalacak) ...
 	[HttpGet("{id}")]
 	public async Task<IActionResult> GetProfile(int id)
 	{
@@ -26,15 +33,14 @@ public class UserController : ControllerBase
 		return Ok(user);
 	}
 
-	// 2) Profil güncelle (login gerekli)
+	// 2. Profil Güncelleme (GÜNCELLENDİ)
 	[Authorize]
 	[HttpPut("update")]
-	public async Task<IActionResult> UpdateProfile([FromBody] dynamic body)
+	public async Task<IActionResult> UpdateProfile([FromBody] UserUpdateDto body)
 	{
-		string? bio = body?.bio;
-		string? avatar = body?.avatarUrl;
+		// Artık body.Bio ve body.AvatarUrl tip güvenli
+		var updated = await _userService.UpdateProfileAsync(body.Bio, body.AvatarUrl);
 
-		var updated = await _userService.UpdateProfileAsync(bio, avatar);
 		if (updated == null)
 			return NotFound(new { message = "Kullanici bulunamadi." });
 

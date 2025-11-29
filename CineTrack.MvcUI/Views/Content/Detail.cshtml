@@ -1,126 +1,164 @@
-@model ContentDetailDto
+@model ContentViewModel
 
 <div class="content-detail container mt-4">
 
-	<!-- Başlık ve Kapak -->
 	<div class="row">
 		<div class="col-md-4">
-			<img src="@(Model.CoverUrl ?? "/images/placeholder-poster.jpg")" class="img-fluid" alt="@Model.Title">
-		</div>
-		<div class="col-md-8">
-			<h2>@Model.Title</h2>
+			<div class="position-relative">
+				<img src="@(Model.CoverUrl ?? "/images/placeholder-poster.jpg")"
+					class="img-fluid rounded shadow-sm w-100" alt="@Model.Title">
 
-			<!-- Meta bilgiler -->
-			<ul class="list-unstyled">
+				<span
+					class="badge position-absolute top-0 end-0 m-2 @(Model.ContentType == "movie" ? "bg-danger" : "bg-info") shadow">
+					<i class="bi @(Model.ContentType == "movie" ? "bi-film" : "bi-book") me-1"></i>
+					@(Model.ContentType == "movie" ? "Film" : "Kitap")
+				</span>
+			</div>
+
+			@if (Model.CurrentUserRating > 0)
+			{
+				<div class="text-center mt-3 p-3 bg-light rounded border shadow-sm">
+					<span class="text-muted small text-uppercase fw-bold">Senin Puanın</span>
+					<div class="fs-1 fw-bold text-warning lh-1">
+						<i class="bi bi-star-fill"></i> @Model.CurrentUserRating
+					</div>
+				</div>
+			}
+		</div>
+
+		<div class="col-md-8">
+			<div class="d-flex justify-content-between align-items-start">
+				<h2 class="fw-bold mb-3">@Model.Title</h2>
+
+				@if (Model.AverageRating.HasValue)
+				{
+					<div class="text-end">
+						<div class="badge bg-warning text-dark fs-5 shadow-sm">
+							<i class="bi bi-star-fill"></i> @Model.AverageRating.Value.ToString("0.0")
+						</div>
+						<div class="small text-muted mt-1">@Model.RatingCount oy</div>
+					</div>
+				}
+			</div>
+
+			<ul class="list-unstyled text-muted mb-4">
 				@if (Model.Year.HasValue)
 				{
-					<li><strong>Yıl:</strong> @Model.Year</li>
+					<li><i class="bi bi-calendar-event me-2"></i><strong>Yıl:</strong> @Model.Year</li>
 				}
 
 				@if (Model.DurationOrPageCount.HasValue)
 				{
-					<li><strong>@(Model.ContentType == "movie" ? "Süre" : "Sayfa"):</strong> @Model.DurationOrPageCount
-						@(Model.ContentType == "movie" ? "dk" : "sayfa")</li>
+					<li>
+						<i class="bi @(Model.ContentType == "movie" ? "bi-clock" : "bi-book-half") me-2"></i>
+						<strong>@(Model.ContentType == "movie" ? "Süre" : "Sayfa"):</strong> @Model.DurationOrPageCount
+						@(Model.ContentType == "movie" ? "dk" : "sayfa")
+					</li>
 				}
 
 				@if (Model.Genres != null && Model.Genres.Any())
 				{
-					<li><strong>Türler:</strong> @string.Join(", ", Model.Genres)</li>
+					<li><i class="bi bi-tags me-2"></i><strong>Türler:</strong> @string.Join(", ", Model.Genres)</li>
 				}
 
 				@if (Model.ContentType == "movie" && Model.Directors != null && Model.Directors.Any())
 				{
-					<li><strong>Yönetmen:</strong> @string.Join(", ", Model.Directors)</li>
+					<li><i class="bi bi-megaphone me-2"></i><strong>Yönetmen:</strong> @string.Join(", ", Model.Directors)
+					</li>
 				}
 
 				@if (Model.ContentType == "book" && Model.Authors != null && Model.Authors.Any())
 				{
-					<li><strong>Yazar:</strong> @string.Join(", ", Model.Authors)</li>
+					<li><i class="bi bi-pen me-2"></i><strong>Yazar:</strong> @string.Join(", ", Model.Authors)</li>
 				}
 			</ul>
 
 			@if (!string.IsNullOrEmpty(Model.Overview))
 			{
-				<p>@Model.Overview</p>
+				<div class="mb-4">
+					<h5 class="fw-bold border-bottom pb-2">Özet</h5>
+					<p class="lead fs-6">@Model.Overview</p>
+				</div>
 			}
 
-			<!-- Puan -->
-			@if (Model.AverageRating.HasValue)
-			{
-				<p><strong>Puan:</strong> @Model.AverageRating.Value.ToString("0.0") / 10 (@Model.RatingCount oy)</p>
-			}
-
-			<!-- Kullanıcı Eylem Butonları -->
-			<div class="mb-3">
-				<label>Puan ver:</label>
-				<input type="number" min="1" max="10" value="@(Model.AverageRating ?? 0)" id="userRating" />
-				<button class="btn btn-primary btn-sm"
-					onclick="submitRating('@Model.Id', '@Model.ContentType')">Gönder</button>
-			</div>
-
-			<div class="mb-3 d-grid gap-2 d-md-block">
+			<div class="d-flex flex-wrap gap-2 mb-4">
 				@if (Model.ContentType == "movie")
 				{
-					<button class="btn btn-success" onclick="addToList('@Model.Id', 'İzlediklerim')">
-						<i class="bi bi-check-circle-fill"></i> İzledim
+					<button class="btn btn-success btn-lg flex-grow-1 flex-md-grow-0" onclick="openRatingModal()">
+						<i class="bi bi-check-circle-fill me-2"></i>İzledim
 					</button>
-					<button class="btn btn-warning" onclick="addToList('@Model.Id', 'İzlenecekler')">
-						<i class="bi bi-bookmark-plus-fill"></i> İzlenecekler
-					</button>
-					<button class="btn btn-info" onclick="openCustomListModal()">
-						<i class="bi bi-list-stars"></i> Özel Listeye Ekle
+
+					<button class="btn btn-warning flex-grow-1 flex-md-grow-0"
+						onclick="addToList('@Model.Id', 'İzlenecekler')">
+						<i class="bi bi-bookmark-plus-fill me-2"></i>İzlenecekler
 					</button>
 				}
 				else
 				{
-					<button class="btn btn-success" onclick="addToList('@Model.Id', 'Okuduklarım')">
-						<i class="bi bi-check-circle-fill"></i> Okudum
+					<button class="btn btn-success btn-lg flex-grow-1 flex-md-grow-0" onclick="openRatingModal()">
+						<i class="bi bi-check-circle-fill me-2"></i>Okudum
 					</button>
-					<button class="btn btn-warning" onclick="addToList('@Model.Id', 'Okunacaklar')">
-						<i class="bi bi-bookmark-plus-fill"></i> Okunacaklar
-					</button>
-					<button class="btn btn-info" onclick="openCustomListModal()">
-						<i class="bi bi-list-stars"></i> Özel Listeye Ekle
+
+					<button class="btn btn-warning flex-grow-1 flex-md-grow-0"
+						onclick="addToList('@Model.Id', 'Okunacaklar')">
+						<i class="bi bi-bookmark-plus-fill me-2"></i>Okunacaklar
 					</button>
 				}
+
+				<button class="btn btn-outline-info flex-grow-1 flex-md-grow-0" onclick="openCustomListModal()">
+					<i class="bi bi-list-stars me-2"></i>Özel Listeye Ekle
+				</button>
 			</div>
 		</div>
 	</div>
 
-	<!-- Yorumlar -->
-	<hr />
-	<h4>Yorumlar (@(Model.Comments?.Count ?? 0))</h4>
-	<div class="comments mb-3">
+	<hr class="my-5" />
+	<h4 class="mb-3"><i class="bi bi-chat-left-text me-2"></i>Yorumlar (@(Model.Comments?.Count ?? 0))</h4>
+
+	<div class="comments mb-4">
 		@if (Model.Comments != null && Model.Comments.Any())
 		{
 			@foreach (var c in Model.Comments)
 			{
-				<div class="border rounded p-2 mb-2">
-					<strong>@c.UserName</strong> <small class="text-muted">@c.CreatedAt.ToString("g")</small>
-					<p>@c.Text</p>
+				<div class="card mb-3 border-0 shadow-sm bg-light">
+					<div class="card-body">
+						<div class="d-flex justify-content-between">
+							<strong class="text-primary">@c.UserName</strong>
+							<small class="text-muted">@c.CreatedAt.ToString("g")</small>
+						</div>
+						<p class="mt-2 mb-0 text-dark">@c.Text</p>
+					</div>
 				</div>
 			}
 		}
 		else
 		{
-			<p>Henüz yorum yok.</p>
+			<div class="alert alert-secondary">Henüz yorum yapılmamış. İlk yorumu sen yap!</div>
 		}
 	</div>
 
-	<div class="mb-3">
-		<textarea id="newComment" class="form-control" placeholder="Yorum yaz..."></textarea>
-		<button class="btn btn-primary mt-2" onclick="submitComment('@Model.Id', '@Model.ContentType')">Gönder</button>
+	<div class="card shadow-sm">
+		<div class="card-body">
+			<h5 class="card-title">Yorum Yap</h5>
+			<textarea id="newComment" class="form-control mb-3" rows="3"
+				placeholder="Bu içerik hakkında ne düşünüyorsun?"></textarea>
+			<div class="text-end">
+				<button class="btn btn-primary" onclick="submitComment('@Model.Id', '@Model.ContentType')">
+					<i class="bi bi-send me-1"></i>Gönder
+				</button>
+			</div>
+		</div>
 	</div>
 
 	<div class="modal fade" id="addCustomListModal" tabindex="-1">
-		<div class="modal-dialog">
+		<div class="modal-dialog modal-dialog-centered">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title">Özel Listeye Ekle</h5>
 					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 				</div>
 				<div class="modal-body">
-					<div id="loadingLists" class="text-center">
+					<div id="loadingLists" class="text-center py-3">
 						<div class="spinner-border text-primary" role="status"></div>
 					</div>
 					<div id="listsContainer" class="list-group">
@@ -130,15 +168,142 @@
 		</div>
 	</div>
 
+	<div class="modal fade" id="ratingModal" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header border-0 pb-0">
+					<h5 class="modal-title w-100 text-center">Nasıl Buldun?</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body text-center pt-2 pb-4">
+					<p class="text-muted mb-4">"@Model.Title" içeriğini puanla</p>
+
+					<div class="star-rating d-inline-flex flex-row-reverse justify-content-center gap-2 mb-4">
+						<input type="radio" id="star5" name="rating" value="5" /><label for="star5"
+							title="Mükemmel (5)"><i class="bi bi-star-fill"></i></label>
+						<input type="radio" id="star4" name="rating" value="4" /><label for="star4"
+							title="Çok İyi (4)"><i class="bi bi-star-fill"></i></label>
+						<input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="İyi (3)"><i
+								class="bi bi-star-fill"></i></label>
+						<input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="Orta (2)"><i
+								class="bi bi-star-fill"></i></label>
+						<input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="Kötü (1)"><i
+								class="bi bi-star-fill"></i></label>
+					</div>
+
+					<div class="d-grid px-4">
+						<button type="button" class="btn btn-primary btn-lg" onclick="submitRatingWithList()">
+							<i class="bi bi-check-lg me-1"></i>Kaydet ve Listeme Ekle
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
 </div>
 
+<style>
+	.star-rating input {
+		display: none;
+	}
+
+	.star-rating label {
+		font-size: 2.5rem;
+		color: #e9ecef;
+		/* Pasif renk */
+		cursor: pointer;
+		transition: color 0.2s, transform 0.1s;
+	}
+
+	.star-rating label:hover {
+		transform: scale(1.1);
+	}
+
+	/* Hover ve Checked durumları (flex-row-reverse sayesinde sağdan sola çalışır) */
+	.star-rating input:checked~label,
+	.star-rating label:hover,
+	.star-rating label:hover~label {
+		color: #ffc107;
+		/* Sarı renk */
+	}
+</style>
+
 <script>
-	// Listeleri getir ve Modalı aç
+	// --- YENİ FONKSİYONLAR ---
+
+	// Puanlama Modalını Aç
+	function openRatingModal() {
+		var modal = new bootstrap.Modal(document.getElementById('ratingModal'));
+
+		// Eğer kullanıcı daha önce puan vermişse o puanı seçili getir
+		var currentRating = @(Model.CurrentUserRating);
+		if (currentRating > 0) {
+			var radio = document.getElementById('star' + currentRating);
+			if (radio) radio.checked = true;
+		}
+
+		modal.show();
+	}
+
+	// Puanı Gönder ve Listeye Ekle
+	function submitRatingWithList() {
+		var ratingInput = document.querySelector('input[name="rating"]:checked');
+		if (!ratingInput) {
+			alert("Lütfen en az 1 yıldız seçin.");
+			return;
+		}
+
+		var ratingValue = ratingInput.value;
+		var contentId = '@Model.Id';
+		// İçerik türüne göre varsayılan listeyi belirle
+		var listName = '@(Model.ContentType == "movie" ? "İzlediklerim" : "Okuduklarım")';
+
+		// 1. Puanı API'ye Gönder
+		var formData = new FormData();
+		formData.append('contentId', contentId);
+		formData.append('rating', ratingValue);
+
+		fetch('/Content/RateContent', {
+			method: 'POST',
+			body: formData
+		})
+			.then(res => res.json())
+			.then(data => {
+				if (data.success) {
+					// 2. Başarılıysa Listeye Ekle (Mevcut fonksiyonu kullanıyoruz)
+					// Bu fonksiyon arkada fetch atar, kullanıcıya alert gösterir.
+					// Kullanıcı deneyimini kesmemek için alert'i bastırabilir veya
+					// addToList fonksiyonunu biraz modifiye edebiliriz.
+					// Şimdilik standart akışta çağırıyoruz:
+
+					// Listeye ekleme işlemi (Arka planda)
+					var listData = new FormData();
+					listData.append('contentId', contentId);
+					listData.append('listName', listName);
+
+					fetch('/Content/AddToList', { method: 'POST', body: listData })
+						.then(() => {
+							// Her şey bitti, sayfayı yenile ki yeni puan görünsün
+							location.reload();
+						});
+
+				} else {
+					alert(data.message);
+				}
+			})
+			.catch(err => {
+				console.error(err);
+				alert("Bir hata oluştu.");
+			});
+	}
+
+	// --- MEVCUT FONKSİYONLAR ---
+
 	function openCustomListModal() {
 		var modal = new bootstrap.Modal(document.getElementById('addCustomListModal'));
 		modal.show();
 
-		// Listeleri temizle ve loading göster
 		document.getElementById('listsContainer').innerHTML = '';
 		document.getElementById('loadingLists').style.display = 'block';
 
@@ -153,7 +318,6 @@
 					return;
 				}
 
-				// Temel listeleri (İzlediklerim vb.) filtrele, sadece özelleri göster
 				var customLists = lists.filter(l =>
 					l.name !== 'İzlediklerim' &&
 					l.name !== 'İzlenecekler' &&
@@ -178,7 +342,6 @@
 
 	function addToCustomList(listId) {
 		var contentId = '@Model.Id';
-
 		var formData = new FormData();
 		formData.append('listId', listId);
 		formData.append('contentId', contentId);
@@ -190,7 +353,6 @@
 			.then(res => res.json())
 			.then(data => {
 				alert(data.message);
-				// Modalı kapat
 				var modalEl = document.getElementById('addCustomListModal');
 				var modal = bootstrap.Modal.getInstance(modalEl);
 				modal.hide();
@@ -198,9 +360,6 @@
 	}
 
 	function addToList(contentId, listName) {
-		// Butona basıldığında kullanıcıya bilgi verelim (basitçe)
-		// İsterseniz burada loading ikonu gösterebilirsiniz.
-
 		const formData = new FormData();
 		formData.append('contentId', contentId);
 		formData.append('listName', listName);
@@ -211,11 +370,9 @@
 		})
 			.then(response => response.json())
 			.then(data => {
-				if (data.success) {
-					alert(data.message); // Başarılı mesajı
-				} else {
-					alert(data.message); // Hata mesajı
-				}
+				// Eğer manuel butonla tıklandıysa (modal dışı) alert göster
+				// Modal içinden çağrıldığında location.reload olacağı için bu alert görünmeyebilir
+				alert(data.message);
 			})
 			.catch(error => {
 				console.error('Error:', error);
@@ -223,15 +380,13 @@
 			});
 	}
 
-	function submitRating(id, type) {
-		var rating = document.getElementById("userRating").value;
-		console.log("Rating gönder:", id, type, rating);
-		// Burada Ajax ile API call yapılabilir
-	}
-
 	function submitComment(id, type) {
 		var comment = document.getElementById("newComment").value;
+		if (!comment) return;
+
+		// Yorum API çağrısı (Simülasyon)
 		console.log("Comment gönder:", id, type, comment);
-		// Burada Ajax ile API call yapılabilir
+		alert("Yorumunuz alındı (Demo).");
+		document.getElementById("newComment").value = "";
 	}
 </script>

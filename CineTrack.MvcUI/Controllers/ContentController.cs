@@ -38,9 +38,30 @@ public class ContentController : Controller
 			return NotFound();
 
 		// Tip güvenli ViewModel ile al
-		var content = await _api.GetAsync<ContentDetailDto>($"/api/content/{type}/{id}");
+		var content = await _api.GetAsync<ContentViewModel>($"/api/content/{type}/{id}");
 		if (content == null)
 			return NotFound();
+
+		if (HttpContext.Session.GetString("token") != null)
+		{
+			// API'ye yeni eklediğimiz endpoint'e istek atıyoruz
+			// Dönen JSON: { "rating": 5 }
+			// Dynamic kullanarak alalım
+			try
+			{
+				var ratingJson = await _api.GetAsync<dynamic>($"api/rating/my-rating/{id}");
+				if (ratingJson != null)
+				{
+					// System.Text.Json.JsonElement olarak gelebilir, parse edelim
+					var el = (System.Text.Json.JsonElement)ratingJson;
+					if (el.TryGetProperty("rating", out var rVal))
+					{
+						content.CurrentUserRating = rVal.GetInt32();
+					}
+				}
+			}
+			catch { /* Hata olursa 0 kalsın */ }
+		}
 
 		// MetadataJson varsa parse edebilirsin ve ContentDetailDto alanlarını doldurabilirsin
 		// Örneğin film süresi, yazar, yönetmen, özet gibi
@@ -86,6 +107,18 @@ public class ContentController : Controller
 		}
 
 		return View(content);
+	}
+
+	[HttpPost]
+	public async Task<IActionResult> RateContent(string contentId, int rating)
+	{
+		var payload = new { contentId = contentId, ratingValue = rating };
+		var response = await _api.PostAsync("api/rating", payload); // RatingController SetRating
+
+		if (response != null)
+			return Json(new { success = true, message = "Puan kaydedildi." });
+
+		return Json(new { success = false, message = "Puan kaydedilirken hata oluştu." });
 	}
 
 	[HttpPost]
