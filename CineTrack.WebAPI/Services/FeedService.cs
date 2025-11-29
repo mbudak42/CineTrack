@@ -28,50 +28,51 @@ public class FeedService
 	// GetFeedAsync metodunu şu şekilde güncelleyin:
 	public async Task<List<ActivityDto>> GetFeedAsync()
 	{
-		var userId = GetUserId();
-
-		// 1. Takip edilenleri bul
-		var followingIds = await _context.Follows
-			.Where(f => f.FollowerId == userId)
-			.Select(f => f.FollowedId)
-			.ToListAsync();
-
-		followingIds.Add(userId); // Kendi aktivitelerimizi de görelim
-
-		// 2. Aktiviteleri çek (User include edilmiş halde)
+		// 1. Takip edilenler mantığını kaldırıyoruz, global akışa dönüyoruz.
+		// Sadece Rating ve Review aktivitelerini filtreliyoruz.
 		var activities = await _context.ActivityLogs
 			.Include(a => a.User)
-			.Where(a => followingIds.Contains(a.UserId))
+			.Where(a => a.ActionType == "rating" || a.ActionType == "review") // Sadece yorum ve puanlar
 			.OrderByDescending(a => a.CreatedAt)
-			.Take(30)
+			.Take(50) // Performans için limit (örneğin son 50 işlem)
 			.ToListAsync();
 
-		// 3. İçerik bilgilerini çek (Toplu sorgu - Performance optimization)
-		var contentIds = activities.Select(a => a.ContentId).Distinct().Where(id => id != null).ToList();
+		// 2. İçerik bilgilerini çek (Toplu sorgu - Performance optimization)
+		var contentIds = activities
+			.Select(a => a.ContentId)
+			.Distinct()
+			.Where(id => id != null)
+			.ToList();
+
 		var contents = await _context.Contents
 			.Where(c => contentIds.Contains(c.Id))
 			.ToDictionaryAsync(c => c.Id);
 
-		// 4. Detay verilerini (Rating/Review) çekmek için listeleri hazırla
+		// 3. Detay verilerini (Rating/Review) çekmek için listeyi hazırla
 		var resultList = new List<ActivityDto>();
 
 		foreach (var a in activities)
 		{
+			// İçerik veritabanında yoksa (silinmiş vs.) bu aktiviteyi atla
+			if (a.ContentId == null || !contents.ContainsKey(a.ContentId)) continue;
+
+			var content = contents[a.ContentId];
+
 			var dto = new ActivityDto
 			{
 				UserId = a.UserId,
 				Username = a.User!.Username,
-				UserAvatar = a.User.AvatarUrl, // Avatar eklendi
+				UserAvatar = a.User.AvatarUrl,
 				ActionType = a.ActionType,
 				TargetId = a.ContentId,
-				TargetTitle = contents.ContainsKey(a.ContentId) ? contents[a.ContentId].Title : "Bilinmiyor",
-				ContentType = contents.ContainsKey(a.ContentId) ? contents[a.ContentId].ContentType : null,
-				CoverUrl = contents.ContainsKey(a.ContentId) ? contents[a.ContentId].CoverUrl : null,
+				TargetTitle = content.Title,
+				ContentType = content.ContentType,
+				CoverUrl = content.CoverUrl,
 				CreatedAt = a.CreatedAt
 			};
 
 			// Eğer Rating ise Puanı bul
-			if (a.ActionType == "rating" && a.ContentId != null)
+			if (a.ActionType == "rating")
 			{
 				var rating = await _context.Ratings
 					.FirstOrDefaultAsync(r => r.UserId == a.UserId && r.ContentId == a.ContentId);
@@ -79,11 +80,10 @@ public class FeedService
 			}
 
 			// Eğer Review ise Yorumu bul
-			if (a.ActionType == "review" && a.ContentId != null)
+			if (a.ActionType == "review")
 			{
-				// En son yorumu alalım
 				var review = await _context.Reviews
-					.OrderByDescending(r => r.CreatedAt)
+					.OrderByDescending(r => r.CreatedAt) // Varsa en son yorumu al
 					.FirstOrDefaultAsync(r => r.UserId == a.UserId && r.ContentId == a.ContentId);
 
 				if (review != null)

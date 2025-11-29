@@ -1,197 +1,121 @@
 @using CineTrack.Shared.DTOs
-@model List<ActivityDto> // Dynamic yerine DTO kullanıyoruz
+@model List<ActivityDto>
 
 @{
 	ViewData["Title"] = "Ana Sayfa";
 }
 
-<div class="container">
+<div class="container py-4">
 
 	@if (Context.Session.GetString("token") == null)
 	{
 		<div class="text-center py-5">
 			<h1 class="display-4 fw-bold mb-3">🎬 CineTrack</h1>
-			<p class="lead text-muted mb-4">Filmleri ve kitapları takip et, arkadaşlarınla paylaş.</p>
+			<p class="lead text-muted mb-4">Filmleri ve kitapları keşfet, topluluğun ne düşündüğünü gör.</p>
 			<div class="d-flex justify-content-center gap-3">
-				<a asp-controller="Auth" asp-action="Login" class="btn btn-primary btn-lg px-4">Giriş Yap</a>
-				<a asp-controller="Auth" asp-action="Register" class="btn btn-outline-dark btn-lg px-4">Kayıt Ol</a>
+				<a asp-controller="Auth" asp-action="Login" class="btn btn-primary btn-lg px-4 shadow-sm">Giriş Yap</a>
+				<a asp-controller="Auth" asp-action="Register" class="btn btn-outline-dark btn-lg px-4 shadow-sm">Kayıt
+					Ol</a>
 			</div>
 		</div>
 	}
 	else
 	{
 		<div class="row justify-content-center">
-			<div class="col-lg-8">
+			<div class="col-lg-7 col-md-9">
+				<h4 class="mb-4 fw-bold text-secondary">Topluluk Akışı</h4>
 
 				@if (Model == null || !Model.Any())
 				{
-					<div class="empty-state">
-						<div class="empty-icon">😴</div>
+					<div class="text-center py-5 bg-white rounded-3 shadow-sm">
+						<div class="fs-1 mb-3">😴</div>
 						<h3>Henüz hareket yok</h3>
-						<p class="empty-text">Akışını canlandırmak için arkadaşlarını takip etmeye başla!</p>
-						<a asp-controller="Search" asp-action="Index" class="empty-action">İçerik Keşfet</a>
+						<p class="text-muted">Toplulukta henüz bir aktivite gerçekleşmemiş.</p>
+						<a asp-controller="Search" asp-action="Index" class="btn btn-outline-primary mt-2">İlk İçeriği Sen
+							Puanla</a>
 					</div>
 				}
 				else
 				{
-					<div class="feed">
+					<div class="d-flex flex-column gap-4">
 						@foreach (var item in Model)
 						{
-							<div class="activity-card">
-								<div class="card-header border-0 pb-0 bg-white">
-									<div class="user-avatar">
-										@if (!string.IsNullOrEmpty(item.UserAvatar))
-										{
-											<img src="@item.UserAvatar"
-												style="width:100%; height:100%; border-radius:50%; object-fit:cover;" />
-										}
-										else
-										{
-											<span>@item.Username?.Substring(0, 1).ToUpper()</span>
-										}
-									</div>
-									<div class="user-info">
-										<div class="user-name">
-											<a asp-controller="User" asp-action="Profile"
-												asp-route-id="@item.UserId">@item.Username</a>
-											<span class="text-muted fw-normal" style="font-size: 0.9rem">
-												@if (item.ActionType == "rating")
-												{
-													<span>puanladı</span>
-												}
-												else if (item.ActionType == "review")
-												{
-
-													<span>inceledi</span>
-												}
-												else if (item.ActionType == "list_add")
-												{
-
-													<span>listeye ekledi</span>
-												}
-												else
-												{
-
-													<span>bir işlem yaptı</span>
-												}
+							<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+								<div class="card-header bg-white border-0 p-3 d-flex align-items-center gap-3">
+									<a asp-controller="User" asp-action="Profile" asp-route-id="@item.UserId"
+										class="text-decoration-none">
+										<img src="@(item.UserAvatar ?? "/images/none.png")" alt="@item.Username"
+											class="rounded-circle border" style="width: 45px; height: 45px; object-fit: cover;">
+									</a>
+									<div class="d-flex flex-column">
+										<div class="fw-bold text-dark">
+											<a asp-controller="User" asp-action="Profile" asp-route-id="@item.UserId"
+												class="text-dark text-decoration-none">
+												@item.Username
+											</a>
+											<span class="fw-normal text-muted ms-1">
+												@(item.ActionType == "rating" ? "puanladı" : "inceledi")
 											</span>
 										</div>
-										<div class="activity-meta">@item.CreatedAt.ToString("dd MMM HH:mm")</div>
+										<small class="text-muted" style="font-size: 0.8rem;">
+											@item.CreatedAt.ToString("dd MMMM HH:mm")
+										</small>
+									</div>
+
+									@if (item.RatingValue.HasValue && item.RatingValue > 0)
+									{
+										<div
+											class="ms-auto bg-warning text-dark px-2 py-1 rounded-3 fw-bold d-flex align-items-center gap-1">
+											<i class="bi bi-star-fill small"></i>
+											<span>@item.RatingValue</span>
+										</div>
+									}
+								</div>
+
+								<div class="card-body p-3 pt-0">
+									<div class="d-flex gap-3">
+										<a asp-controller="Content" asp-action="Detail" asp-route-type="@item.ContentType"
+											asp-route-id="@item.TargetId" class="flex-shrink-0">
+											<img src="@(item.CoverUrl ?? "/images/placeholder.jpg")" class="rounded-3 shadow-sm"
+												alt="@item.TargetTitle" style="width: 100px; aspect-ratio: 2/3; object-fit: cover;">
+										</a>
+
+										<div class="flex-grow-1">
+											<h5 class="fw-bold mb-1">
+												<a asp-controller="Content" asp-action="Detail" asp-route-type="@item.ContentType"
+													asp-route-id="@item.TargetId" class="text-dark text-decoration-none">
+													@item.TargetTitle
+												</a>
+											</h5>
+											<div class="mb-2">
+												<span
+													class="badge @(item.ContentType == "movie" ? "bg-danger" : "bg-info") bg-opacity-75">
+													@(item.ContentType == "movie" ? "Film" : "Kitap")
+												</span>
+											</div>
+
+											@if (!string.IsNullOrEmpty(item.ReviewText))
+											{
+												<div class="bg-light p-3 rounded-3 position-relative mt-2">
+													<i
+														class="bi bi-quote position-absolute top-0 start-0 ms-2 mt-1 text-secondary opacity-25 fs-3"></i>
+													<p class="mb-0 text-dark small fst-italic ps-3 py-1" style="line-height: 1.5;">
+														@item.ReviewText
+													</p>
+												</div>
+											}
+										</div>
 									</div>
 								</div>
 
-								<div class="card-body pt-3">
-
-									@if (item.ActionType == "rating")
-									{
-										<div class="d-flex flex-column align-items-center text-center">
-											<a asp-controller="Content" asp-action="Detail" asp-route-type="@item.ContentType"
-												asp-route-id="@item.TargetId" class="mb-3 d-block position-relative">
-												<img src="@(item.CoverUrl ?? "/images/placeholder.jpg")" class="rounded shadow-sm"
-													style="width: 160px; aspect-ratio: 2/3; object-fit: cover;" alt="@item.TargetTitle">
-											</a>
-
-											<h5 class="fw-bold mb-1">@item.TargetTitle</h5>
-
-											<div class="rating-display justify-content-center mt-2 p-2 bg-light rounded-pill px-4">
-												<div class="stars text-warning">
-													@for (int i = 1; i <= 5; i++)
-													{
-														if (i <= item.RatingValue)
-														{
-															<i class="bi bi-star-fill"></i>
-														}
-														else
-														{
-
-															<i class="bi bi-star text-black-50"></i>
-														}
-													}
-												</div>
-												<span class="rating-value ms-2 text-dark">@item.RatingValue/5</span>
-											</div>
-										</div>
-									}
-
-									else if (item.ActionType == "review")
-									{
-										<div class="activity-content">
-											<a asp-controller="Content" asp-action="Detail" asp-route-type="@item.ContentType"
-												asp-route-id="@item.TargetId">
-												<img src="@(item.CoverUrl ?? "/images/placeholder.jpg")" class="content-poster"
-													alt="@item.TargetTitle">
-											</a>
-
-											<div class="content-details">
-												<h5 class="content-title">
-													<a asp-controller="Content" asp-action="Detail" asp-route-type="@item.ContentType"
-														asp-route-id="@item.TargetId" class="text-decoration-none text-dark">
-														@item.TargetTitle
-													</a>
-												</h5>
-												<div class="content-info">
-													<i class="bi @(item.ContentType == "movie" ? "bi-film" : "bi-book")"></i>
-													@(item.ContentType == "movie" ? "Film" : "Kitap")
-												</div>
-
-												@if (!string.IsNullOrEmpty(item.ReviewText))
-												{
-													<div class="review-excerpt position-relative">
-														<i
-															class="bi bi-quote fs-3 text-secondary opacity-25 position-absolute top-0 start-0 ps-2"></i>
-														<p class="mb-1 fst-italic text-dark ps-3">
-															@if (item.ReviewText.Length > 180)
-															{
-																@item.ReviewText.Substring(0, 180)
-										
-																<span>...</span>
-															}
-															else
-															{
-																@item.ReviewText
-															}
-														</p>
-														@if (item.ReviewText.Length > 180)
-														{
-															<div class="text-end">
-																<a asp-controller="Content" asp-action="Detail"
-																	asp-route-type="@item.ContentType" asp-route-id="@item.TargetId"
-																	class="read-more small">
-																	Devamını oku <i class="bi bi-arrow-right"></i>
-																</a>
-															</div>
-														}
-													</div>
-												}
-											</div>
-										</div>
-									}
-
-									else
-									{
-										<div class="activity-content">
-											<img src="@(item.CoverUrl ?? "/images/placeholder.jpg")" class="content-poster"
-												style="width: 60px; height: 90px;">
-											<div class="ms-3 align-self-center">
-												<h5 class="fw-bold mb-1">@item.TargetTitle</h5>
-												<span class="badge bg-secondary">Listeye Eklendi</span>
-											</div>
-										</div>
-									}
-
-								</div>
-
-								<div class="card-footer bg-white border-top-0 pt-0">
-									<button class="action-btn" onclick="toggleLike(this)">
-										<i class="bi bi-heart"></i> <span>0 Beğeni</span>
+								<div class="card-footer bg-white border-top p-2 d-flex justify-content-between align-items-center">
+									<button class="btn btn-sm btn-light text-muted" onclick="toggleLike(this)">
+										<i class="bi bi-heart me-1"></i> Beğen
 									</button>
 									<a asp-controller="Content" asp-action="Detail" asp-route-type="@item.ContentType"
-										asp-route-id="@item.TargetId" class="action-btn text-decoration-none">
-										<i class="bi bi-chat-bubble"></i> Yorum Yap
+										asp-route-id="@item.TargetId" class="btn btn-sm btn-light text-primary">
+										<i class="bi bi-chat-left-text me-1"></i> Yorum Yap
 									</a>
-									<button class="action-btn ms-auto">
-										<i class="bi bi-share"></i>
-									</button>
 								</div>
 							</div>
 						}
