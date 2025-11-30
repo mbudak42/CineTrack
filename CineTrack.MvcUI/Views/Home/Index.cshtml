@@ -109,12 +109,20 @@
 								</div>
 
 								<div class="card-footer bg-white border-top p-2 d-flex justify-content-between align-items-center">
-									<button class="btn btn-sm btn-light text-muted" onclick="toggleLike(this)">
-										<i class="bi bi-heart me-1"></i> Beğen
+									<button class="btn btn-sm btn-light @(item.IsLiked ? "text-danger" : "text-muted")"
+										onclick="toggleLike(this, @item.Id)">
+										<i class="bi @(item.IsLiked ? "bi-heart-fill" : "bi-heart") me-1"></i>
+										<span>@item.LikeCount</span> Beğeni
 									</button>
+
+									<button class="btn btn-sm btn-light text-primary" onclick="openCommentsModal(@item.Id)">
+										<i class="bi bi-chat-dots me-1"></i>
+										<span>@item.CommentCount</span> Yorum
+									</button>
+
 									<a asp-controller="Content" asp-action="Detail" asp-route-type="@item.ContentType"
-										asp-route-id="@item.TargetId" class="btn btn-sm btn-light text-primary">
-										<i class="bi bi-chat-left-text me-1"></i> Yorum Yap
+										asp-route-id="@item.TargetId" class="btn btn-sm btn-light text-secondary">
+										<i class="bi bi-arrow-right-short"></i> İncele
 									</a>
 								</div>
 							</div>
@@ -124,6 +132,27 @@
 			</div>
 		</div>
 	}
+
+	<div class="modal fade" id="commentsModal" tabindex="-1">
+		<div class="modal-dialog modal-dialog-scrollable">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Yorumlar</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body">
+					<div id="commentsList" class="d-flex flex-column gap-3">
+					</div>
+				</div>
+				<div class="modal-footer">
+					<div class="input-group">
+						<input type="text" id="commentInput" class="form-control" placeholder="Yorum yaz...">
+						<button class="btn btn-primary" onclick="submitComment()">Gönder</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 
 @section Scripts {
