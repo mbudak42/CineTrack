@@ -89,7 +89,7 @@
 					</button>
 
 					<button class="btn btn-warning flex-grow-1 flex-md-grow-0"
-						onclick="addToList('@Model.Id', 'İzlenecekler')">
+						onclick="addToList('@Model.Id', 'izlenecekler')">
 						<i class="bi bi-bookmark-plus-fill me-2"></i>İzlenecekler
 					</button>
 				}
@@ -100,7 +100,7 @@
 					</button>
 
 					<button class="btn btn-warning flex-grow-1 flex-md-grow-0"
-						onclick="addToList('@Model.Id', 'Okunacaklar')">
+						onclick="addToList('@Model.Id', 'okunacaklar')">
 						<i class="bi bi-bookmark-plus-fill me-2"></i>Okunacaklar
 					</button>
 				}
@@ -257,7 +257,7 @@
 		var ratingValue = ratingInput.value;
 		var contentId = '@Model.Id';
 		// İçerik türüne göre varsayılan listeyi belirle
-		var listName = '@(Model.ContentType == "movie" ? "İzlediklerim" : "Okuduklarım")';
+		var listName = '@(Model.ContentType == "movie" ? "izlediklerim" : "okuduklarim")';
 
 		// 1. Puanı API'ye Gönder
 		var formData = new FormData();
@@ -319,10 +319,10 @@
 				}
 
 				var customLists = lists.filter(l =>
-					l.name !== 'İzlediklerim' &&
-					l.name !== 'İzlenecekler' &&
-					l.name !== 'Okuduklarım' &&
-					l.name !== 'Okunacaklar'
+					l.name !== 'izlediklerim' &&
+					l.name !== 'izlenecekler' &&
+					l.name !== 'okuduklarim' &&
+					l.name !== 'okunacaklar'
 				);
 
 				if (customLists.length === 0) {
