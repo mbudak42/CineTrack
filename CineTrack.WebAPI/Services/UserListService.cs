@@ -70,6 +70,32 @@ public class UserListService
 		}).ToList();
 	}
 
+	// Mevcut GetUserListsAsync sadece giriş yapan kişiyi getiriyor.
+	// Bu yeni metot, ID'si verilen herhangi bir kullanıcının listelerini getirir.
+	public async Task<List<UserListDto>> GetListsByUserIdAsync(int targetUserId)
+	{
+		var lists = await _context.UserLists
+			.Include(l => l.ListContents)
+			.ThenInclude(lc => lc.Content)
+			.Where(l => l.UserId == targetUserId)
+			.ToListAsync();
+
+		return lists.Select(l => new UserListDto
+		{
+			Id = l.Id,
+			Name = l.ListName,
+			// Açıklama alanı entity'de yoksa boş geçiyoruz, varsa ekleyebilirsiniz
+			Description = null,
+			Contents = l.ListContents.Select(lc => new ContentDto
+			{
+				Id = lc.ContentId,
+				Title = lc.Content.Title,
+				ContentType = lc.Content.ContentType,
+				CoverUrl = lc.Content.CoverUrl
+			}).ToList()
+		}).ToList();
+	}
+
 	// 3) Liste detayını getir
 	public async Task<UserListDto?> GetListDetailAsync(int listId)
 	{

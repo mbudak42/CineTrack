@@ -44,23 +44,34 @@ public class ContentController : Controller
 
 		if (HttpContext.Session.GetString("token") != null)
 		{
-			// API'ye yeni eklediğimiz endpoint'e istek atıyoruz
-			// Dönen JSON: { "rating": 5 }
-			// Dynamic kullanarak alalım
+			// API'den dönen veri yapısı için geçici bir sınıf veya anonim tip kullanımı yerine
+			// JsonElement ile güvenli erişim sağlayalım ve hatayı loglayalım.
 			try
 			{
-				var ratingJson = await _api.GetAsync<dynamic>($"api/rating/my-rating/{id}");
-				if (ratingJson != null)
+				// 1. Loglama ekleyerek hatayı konsolda görebiliriz
+				var endpoint = $"api/rating/my-rating/{id}";
+
+				// 2. Dynamic yerine JsonElement olarak çekmek daha güvenlidir
+				var ratingElement = await _api.GetAsync<System.Text.Json.JsonElement?>(endpoint);
+
+				if (ratingElement.HasValue)
 				{
-					// System.Text.Json.JsonElement olarak gelebilir, parse edelim
-					var el = (System.Text.Json.JsonElement)ratingJson;
-					if (el.TryGetProperty("rating", out var rVal))
+					// JsonElement struct olduğu için Value property'sine erişiyoruz
+					var el = ratingElement.Value;
+
+					// 3. Büyük/küçük harf duyarlılığını aşmak için
+					// API genelde "rating" döner ama garantiye alalım.
+					if (el.TryGetProperty("rating", out var rVal) || el.TryGetProperty("Rating", out rVal))
 					{
 						content.CurrentUserRating = rVal.GetInt32();
 					}
 				}
 			}
-			catch { /* Hata olursa 0 kalsın */ }
+			catch (Exception ex)
+			{
+				// Hata varsa Visual Studio Output penceresine yazdır
+				Console.WriteLine($"❌ Puan çekme hatası: {ex.Message}");
+			}
 		}
 
 		// MetadataJson varsa parse edebilirsin ve ContentDetailDto alanlarını doldurabilirsin

@@ -34,7 +34,6 @@ public class UserController : Controller
 
 		if (!model.IsOwner && currentUserId.HasValue)
 		{
-			// Ziyaretçi bu kişiyi takip ediyor mu? (Takip edilenler listesinden kontrol et)
 			var myFollowing = await _api.GetAsync<List<UserResponseDto>>($"api/user/{currentUserId}/following");
 			model.IsFollowing = myFollowing?.Any(u => u.Id == targetUserId) ?? false;
 		}
@@ -45,46 +44,36 @@ public class UserController : Controller
 		model.FollowersCount = followers?.Count ?? 0;
 		model.FollowingCount = following?.Count ?? 0;
 
-		// 5. Listeleri Çek ve Grupla
-		// Not: API tarafında tüm listeleri çeken bir endpoint varsayıyoruz veya UserListController kullanıyoruz.
-		// UserListController'da "GetUserListsAsync" sadece "current user" için çalışıyor gibi görünüyor.
-		// Eğer başkasının listelerini görmek istiyorsak API'de düzenleme gerekebilir. 
-		// Şimdilik sadece IsOwner ise veya API izin veriyorsa çekelim.
+		// 5. Listeleri Çek ve Grupla (GÜNCELLENDİ)
+		// Artık sadece IsOwner kontrolü YAPMIYORUZ. Herkes listeleri görebilir.
+		// Yeni eklediğimiz API endpointini kullanıyoruz: api/userlist/user/{id}
+		var allLists = await _api.GetAsync<List<UserListDto>>($"api/userlist/user/{targetUserId}");
 
-		// Simülasyon: Kullanıcının listelerini çekiyoruz.
-		// (Gerçek senaryoda API'de "api/userlist/user/{id}" gibi bir endpoint olmalı, 
-		// mevcut kodda "api/userlist" sadece login olan kullanıcıyı getiriyor. 
-		// Bu örnekte kendi profilimizi görüntülüyorsak listeler gelir.)
-		// ...
-		if (model.IsOwner)
+		if (allLists != null)
 		{
-			var allLists = await _api.GetAsync<List<UserListDto>>("api/userlist");
-			if (allLists != null)
+			foreach (var list in allLists)
 			{
-				foreach (var list in allLists)
+				switch (list.Name)
 				{
-					switch (list.Name)
-					{
-						case "izlediklerim":
-							model.WatchedMovies.AddRange(list.Contents ?? new());
-							model.WatchedListId = list.Id; // ID'yi kaydet
-							break;
-						case "izlenecekler":
-							model.WatchlistMovies.AddRange(list.Contents ?? new());
-							model.WatchlistListId = list.Id; // ID'yi kaydet
-							break;
-						case "okuduklarim":
-							model.ReadBooks.AddRange(list.Contents ?? new());
-							model.ReadListId = list.Id; // ID'yi kaydet
-							break;
-						case "okunacaklar":
-							model.ReadingListBooks.AddRange(list.Contents ?? new());
-							model.ReadingListId = list.Id; // ID'yi kaydet
-							break;
-						default:
-							model.CustomLists.Add(list);
-							break;
-					}
+					case "izlediklerim":
+						model.WatchedMovies.AddRange(list.Contents ?? new());
+						model.WatchedListId = list.Id;
+						break;
+					case "izlenecekler":
+						model.WatchlistMovies.AddRange(list.Contents ?? new());
+						model.WatchlistListId = list.Id;
+						break;
+					case "okuduklarim":
+						model.ReadBooks.AddRange(list.Contents ?? new());
+						model.ReadListId = list.Id;
+						break;
+					case "okunacaklar":
+						model.ReadingListBooks.AddRange(list.Contents ?? new());
+						model.ReadingListId = list.Id;
+						break;
+					default:
+						model.CustomLists.Add(list);
+						break;
 				}
 			}
 		}

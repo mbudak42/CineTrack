@@ -102,4 +102,13 @@ public class UserListController : ControllerBase
 
 		return Ok(new { success = true, message = "Liste güncellendi.", data = result });
 	}
+
+	// Belirli bir kullanıcının listelerini getir (Profil ziyareti için)
+	[HttpGet("user/{userId}")]
+	[AllowAnonymous] // İsteğe bağlı: Giriş yapmayanlar da başkasının listesini görebilsin mi? Evetse AllowAnonymous.
+	public async Task<IActionResult> GetListsByUserId(int userId)
+	{
+		var lists = await _listService.GetListsByUserIdAsync(userId);
+		return Ok(lists);
+	}
 }
