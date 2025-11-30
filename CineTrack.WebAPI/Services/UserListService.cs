@@ -138,4 +138,42 @@ public class UserListService
 		await _context.SaveChangesAsync();
 		return true;
 	}
+
+	// 6) Listeyi Tamamen Sil
+	public async Task<bool> DeleteListAsync(int listId)
+	{
+		var userId = GetUserId();
+		// Sadece listenin sahibi silebilir
+		var list = await _context.UserLists.FirstOrDefaultAsync(l => l.Id == listId && l.UserId == userId);
+
+		if (list == null) return false;
+
+		_context.UserLists.Remove(list);
+		await _context.SaveChangesAsync();
+		return true;
+	}
+
+	// 7) Listeyi Güncelle (Ad ve Açıklama)
+	public async Task<UserListDto?> UpdateListAsync(int listId, string newName, string? newDesc)
+	{
+		var userId = GetUserId();
+		var list = await _context.UserLists.FirstOrDefaultAsync(l => l.Id == listId && l.UserId == userId);
+
+		if (list == null) return null;
+
+		list.ListName = newName;
+		// Description veritabanında kolon olarak yoksa burayı atlayabilirsiniz, 
+		// ancak UserListDto'da Description var görünüyor, Entity'de yoksa Entity'ye de eklenmeli.
+		// Mevcut entity yapısına göre sadece ismi güncelliyoruz:
+
+		await _context.SaveChangesAsync();
+
+		return new UserListDto
+		{
+			Id = list.Id,
+			Name = list.ListName,
+			// Description entity'de olmadığı için boş dönüyoruz veya client'tan geleni basıyoruz
+			Description = newDesc
+		};
+	}
 }

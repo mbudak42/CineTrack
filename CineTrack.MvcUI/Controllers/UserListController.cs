@@ -89,4 +89,44 @@ public class UserListController : Controller
 		// Profil sayfasına geri dön
 		return RedirectToAction("Profile");
 	}
+
+	// Mevcut UserListController sınıfının içine ekle
+
+	// 5. Listeden İçerik Çıkar
+	[HttpPost]
+	public async Task<IActionResult> RemoveContent(int listId, string contentId)
+	{
+		// WebAPI: DELETE api/userlist/{id}/remove/{contentId}
+		var response = await _api.DeleteAsync($"api/userlist/{listId}/remove/{contentId}");
+
+		if (response)
+			return Json(new { success = true, message = "İçerik listeden çıkarıldı." });
+
+		return Json(new { success = false, message = "İçerik silinemedi." });
+	}
+
+	// 6. Listeyi Sil
+	[HttpPost]
+	public async Task<IActionResult> DeleteList(int id)
+	{
+		var response = await _api.DeleteAsync($"api/userlist/{id}");
+
+		if (response)
+			return Json(new { success = true, message = "Liste silindi." });
+
+		return Json(new { success = false, message = "Liste silinemedi." });
+	}
+
+	// 7. Listeyi Güncelle
+	[HttpPost]
+	public async Task<IActionResult> UpdateList(int id, string name, string description)
+	{
+		var payload = new { name, description };
+		var response = await _api.PutAsync($"api/userlist/{id}", payload);
+
+		if (response != null)
+			return Json(new { success = true, message = "Liste güncellendi." });
+
+		return Json(new { success = false, message = "Güncelleme başarısız." });
+	}
 }

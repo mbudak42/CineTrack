@@ -55,28 +55,31 @@ public class UserController : Controller
 		// (Gerçek senaryoda API'de "api/userlist/user/{id}" gibi bir endpoint olmalı, 
 		// mevcut kodda "api/userlist" sadece login olan kullanıcıyı getiriyor. 
 		// Bu örnekte kendi profilimizi görüntülüyorsak listeler gelir.)
+		// ...
 		if (model.IsOwner)
 		{
 			var allLists = await _api.GetAsync<List<UserListDto>>("api/userlist");
 			if (allLists != null)
 			{
-				// Listeleri ismine göre ayırıyoruz
 				foreach (var list in allLists)
 				{
-					// İsimleri küçük harf duyarlılığı olmadan veya direkt İngilizce key ile kontrol ediyoruz
 					switch (list.Name)
 					{
 						case "izlediklerim":
 							model.WatchedMovies.AddRange(list.Contents ?? new());
+							model.WatchedListId = list.Id; // ID'yi kaydet
 							break;
 						case "izlenecekler":
 							model.WatchlistMovies.AddRange(list.Contents ?? new());
+							model.WatchlistListId = list.Id; // ID'yi kaydet
 							break;
 						case "okuduklarim":
 							model.ReadBooks.AddRange(list.Contents ?? new());
+							model.ReadListId = list.Id; // ID'yi kaydet
 							break;
 						case "okunacaklar":
 							model.ReadingListBooks.AddRange(list.Contents ?? new());
+							model.ReadingListId = list.Id; // ID'yi kaydet
 							break;
 						default:
 							model.CustomLists.Add(list);

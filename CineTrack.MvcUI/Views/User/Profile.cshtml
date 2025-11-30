@@ -3,7 +3,52 @@
 	ViewData["Title"] = Model.User.Username + " Profili";
 }
 
+@* --- 1. RAZOR HELPER: İçerik Izgarası ve Silme Butonu --- *@
+@functions {
+	public async Task RenderContentGrid(Microsoft.AspNetCore.Mvc.Rendering.IHtmlHelper html,
+	List<CineTrack.Shared.DTOs.ContentDto> contents, int listId, bool isOwner)
+	{
+		if (contents != null && contents.Any())
+		{
+			<div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
+				@foreach (var item in contents)
+				{
+					<div class="col content-col">
+						<div class="card h-100 shadow-sm border-0 position-relative">
+							@if (isOwner)
+							{
+								<button onclick="removeContentFromList(@listId, '@item.Id', this)"
+									class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 shadow-sm"
+									style="z-index: 10; border-radius: 50%; width: 30px; height: 30px; padding: 0; display: flex; align-items: center; justify-content: center;"
+									title="Listeden Çıkar">
+									<i class="bi bi-trash-fill" style="font-size: 0.8rem;"></i>
+								</button>
+							}
+
+							<img src="@(item.CoverUrl ?? "/images/placeholder.jpg")" class="card-img-top"
+								style="aspect-ratio: 2/3; object-fit: cover;">
+							<div class="card-body p-2">
+								<h6 class="card-title text-truncate small mb-1" title="@item.Title">@item.Title</h6>
+								<a href="/Content/Detail?type=@item.ContentType&id=@item.Id"
+									class="btn btn-xs btn-outline-secondary w-100 stretched-link">Detay</a>
+							</div>
+						</div>
+					</div>
+				}
+			</div>
+		}
+		else
+		{
+			<div class="text-center py-5 text-muted">
+				<i class="bi bi-inbox fs-1 d-block mb-2"></i>
+				Bu listede henüz içerik yok.
+			</div>
+		}
+	}
+}
+
 <div class="container py-4">
+	@* --- 2. PROFİL KARTI --- *@
 	<div class="card shadow-sm mb-4">
 		<div class="card-body">
 			<div class="row align-items-center">
@@ -62,6 +107,7 @@
 		</div>
 	</div>
 
+	@* --- 3. SEKMELER --- *@
 	<ul class="nav nav-tabs mb-4" id="profileTabs" role="tablist">
 		<li class="nav-item">
 			<button class="nav-link active" data-bs-toggle="tab" data-bs-target="#library">
@@ -82,6 +128,7 @@
 
 	<div class="tab-content" id="profileTabsContent">
 
+		@* --- SEKME 1: KÜTÜPHANE (Standart Listeler) --- *@
 		<div class="tab-pane fade show active" id="library">
 			<div class="row">
 				<div class="col-md-3 mb-3">
@@ -100,22 +147,33 @@
 				<div class="col-md-9">
 					<div class="tab-content">
 						<div class="tab-pane fade show active" id="lib-watched">
-							@await Html.PartialAsync("_ContentGrid", Model.WatchedMovies)
+							@{
+								await RenderContentGrid(Html, Model.WatchedMovies, Model.WatchedListId, Model.IsOwner);
+							}
 						</div>
 						<div class="tab-pane fade" id="lib-watchlist">
-							@await Html.PartialAsync("_ContentGrid", Model.WatchlistMovies)
+							@{
+								await RenderContentGrid(Html, Model.WatchlistMovies, Model.WatchlistListId,
+								Model.IsOwner);
+							}
 						</div>
 						<div class="tab-pane fade" id="lib-read">
-							@await Html.PartialAsync("_ContentGrid", Model.ReadBooks)
+							@{
+								await RenderContentGrid(Html, Model.ReadBooks, Model.ReadListId, Model.IsOwner);
+							}
 						</div>
 						<div class="tab-pane fade" id="lib-reading">
-							@await Html.PartialAsync("_ContentGrid", Model.ReadingListBooks)
+							@{
+								await RenderContentGrid(Html, Model.ReadingListBooks, Model.ReadingListId,
+								Model.IsOwner);
+							}
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 
+		@* --- SEKME 2: ÖZEL LİSTELER --- *@
 		<div class="tab-pane fade" id="lists">
 			@if (Model.CustomLists.Any())
 			{
@@ -123,14 +181,29 @@
 					@foreach (var list in Model.CustomLists)
 					{
 						<div class="col-md-4 mb-3">
-							<div class="card h-100">
+							<div class="card h-100 position-relative">
 								<div class="card-body">
 									<h5 class="card-title">@list.Name</h5>
 									<p class="card-text text-muted">@list.Description</p>
 									<p class="card-text"><small>@(list.Contents?.Count ?? 0) içerik</small></p>
-									<button class="btn btn-sm btn-outline-primary" onclick="showListContents(@list.Id)">
-										<i class="bi bi-eye"></i> Listeyi Gör
-									</button>
+
+									<div class="d-flex gap-2 mt-3">
+										<button class="btn btn-sm btn-outline-primary flex-grow-1"
+											onclick="showListContents(@list.Id)">
+											<i class="bi bi-eye"></i> İncele
+										</button>
+
+										@if (Model.IsOwner)
+										{
+											<button class="btn btn-sm btn-outline-secondary"
+												onclick="openEditListModal(@list.Id, '@list.Name', '@list.Description')">
+												<i class="bi bi-pencil"></i>
+											</button>
+											<button class="btn btn-sm btn-outline-danger" onclick="deleteList(@list.Id)">
+												<i class="bi bi-trash"></i>
+											</button>
+										}
+									</div>
 								</div>
 							</div>
 						</div>
@@ -143,6 +216,7 @@
 			}
 		</div>
 
+		@* --- SEKME 3: AKTİVİTELER --- *@
 		<div class="tab-pane fade" id="activity">
 			@if (Model.RecentActivities.Any())
 			{
@@ -170,6 +244,7 @@
 	</div>
 </div>
 
+@* --- MODALLAR --- *@
 @if (Model.IsOwner)
 {
 	<div class="modal fade" id="createListModal" tabindex="-1">
@@ -196,6 +271,34 @@
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
 					<button type="button" class="btn btn-primary" onclick="submitCreateList()">Oluştur</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="editListModal" tabindex="-1">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Listeyi Düzenle</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body">
+					<form id="editListForm">
+						<input type="hidden" id="editListId" />
+						<div class="mb-3">
+							<label class="form-label">Liste Adı</label>
+							<input type="text" class="form-control" id="editListName" required>
+						</div>
+						<div class="mb-3">
+							<label class="form-label">Açıklama</label>
+							<textarea class="form-control" id="editListDesc" rows="3"></textarea>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+					<button type="button" class="btn btn-primary" onclick="submitUpdateList()">Kaydet</button>
 				</div>
 			</div>
 		</div>
@@ -243,9 +346,7 @@
 				<div id="detailLoading" class="text-center py-4">
 					<div class="spinner-border text-primary" role="status"></div>
 				</div>
-
 				<div id="listContentsContainer" class="row row-cols-2 row-cols-md-3 g-3"></div>
-
 				<div id="detailEmpty" class="alert alert-info text-center" style="display:none;">
 					Bu listede henüz içerik yok.
 				</div>
@@ -254,21 +355,19 @@
 	</div>
 </div>
 
+@* --- SCRIPTS --- *@
 <script>
-
+	// 1. Liste Detayını Göster
 	function showListContents(listId) {
-		// Modalı aç
 		var modal = new bootstrap.Modal(document.getElementById('listDetailModal'));
 		modal.show();
 
-		// Yükleniyor durumuna getir
 		document.getElementById('detailLoading').style.display = 'block';
 		document.getElementById('listContentsContainer').innerHTML = '';
 		document.getElementById('detailEmpty').style.display = 'none';
 		document.getElementById('detailModalTitle').innerText = 'Yükleniyor...';
 		document.getElementById('detailModalDesc').innerText = '';
 
-		// Veriyi çek
 		fetch('/UserList/GetListDetails/' + listId)
 			.then(res => res.json())
 			.then(response => {
@@ -284,55 +383,124 @@
 				document.getElementById('detailModalTitle').innerText = list.name;
 				document.getElementById('detailModalDesc').innerText = list.description || '';
 
-				// İçerik yoksa uyarı göster
 				if (!list.contents || list.contents.length === 0) {
 					document.getElementById('detailEmpty').style.display = 'block';
 					return;
 				}
 
-				// İçerikleri listele
+				var isOwner = @(Model.IsOwner.ToString().ToLower());
 				var container = document.getElementById('listContentsContainer');
+
 				list.contents.forEach(item => {
+					var deleteBtn = '';
+					if (isOwner) {
+						deleteBtn = `
+                            <button onclick="removeContentFromList(${listId}, '${item.id}', this)" 
+                                    class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 shadow-sm" 
+                                    style="z-index: 10; border-radius: 50%; width: 30px; height: 30px; padding: 0; display: flex; align-items: center; justify-content: center;"
+                                    title="Listeden Çıkar">
+                                <i class="bi bi-trash-fill" style="font-size: 0.8rem;"></i>
+                            </button>
+                        `;
+					}
 					var cardHtml = `
-                            <div class="col">
-                                <div class="card h-100 shadow-sm">
-                                    <img src="${item.coverUrl || '/images/placeholder.jpg'}" class="card-img-top" 
-                                         style="aspect-ratio: 2/3; object-fit: cover;">
-                                    <div class="card-body p-2">
-                                        <h6 class="card-title text-truncate small mb-1" title="${item.title}">${item.title}</h6>
-                                        <a href="/Content/Detail?type=${item.contentType}&id=${item.id}" 
-                                           class="btn btn-xs btn-outline-secondary w-100 stretched-link">Detay</a>
-                                    </div>
+                        <div class="col content-col">
+                            <div class="card h-100 shadow-sm position-relative">
+                                ${deleteBtn}
+                                <img src="${item.coverUrl || '/images/placeholder.jpg'}" class="card-img-top" 
+                                     style="aspect-ratio: 2/3; object-fit: cover;">
+                                <div class="card-body p-2">
+                                    <h6 class="card-title text-truncate small mb-1" title="${item.title}">${item.title}</h6>
+                                    <a href="/Content/Detail?type=${item.contentType}&id=${item.id}" 
+                                       class="btn btn-xs btn-outline-secondary w-100 stretched-link">Detay</a>
                                 </div>
                             </div>
-                        `;
+                        </div>
+                    `;
 					container.innerHTML += cardHtml;
 				});
 			})
 			.catch(err => {
 				console.error(err);
-				alert("Liste detayları yüklenirken bir hata oluştu.");
+				alert("Hata oluştu.");
 			});
 	}
-		
-	function submitCreateList() {
-		var name = document.getElementById('listName').value;
-		var desc = document.getElementById('listDesc').value;
 
-		if (!name) { alert("Lütfen bir isim girin."); return; }
+	// 2. İçerik Silme
+	function removeContentFromList(listId, contentId, btnElement) {
+		// stretched-link ve buton çakışmasını önle
+		if (event) {
+			event.stopPropagation();
+			event.preventDefault();
+		}
+
+		if (!confirm('Bu içeriği listeden çıkarmak istediğinize emin misiniz?')) return;
 
 		var formData = new FormData();
-		formData.append('name', name);
-		formData.append('description', desc);
+		formData.append('listId', listId);
+		formData.append('contentId', contentId);
 
-		fetch('/UserList/Create', {
+		fetch('/UserList/RemoveContent', {
 			method: 'POST',
 			body: formData
 		})
 			.then(res => res.json())
 			.then(data => {
-				alert(data.message);
-				if (data.success) location.reload(); // Sayfayı yenile ki yeni liste görünsün
+				if (data.success) {
+					var col = btnElement.closest('.content-col');
+					col.style.transition = 'all 0.3s';
+					col.style.opacity = '0';
+					col.style.transform = 'scale(0.8)';
+					setTimeout(() => {
+						col.remove();
+						if (document.querySelectorAll('.content-col').length === 0) {
+							// Eğer detay modalındaysak
+							var detailEmpty = document.getElementById('detailEmpty');
+							if (detailEmpty) detailEmpty.style.display = 'block';
+						}
+					}, 300);
+				} else {
+					alert(data.message);
+				}
 			});
+	}
+
+	// 3. Liste Silme
+	function deleteList(listId) {
+		if (!confirm('Bu listeyi tamamen silmek istediğinize emin misiniz?')) return;
+		var formData = new FormData();
+		formData.append('id', listId);
+		fetch('/UserList/DeleteList', { method: 'POST', body: formData })
+			.then(res => res.json()).then(data => { if (data.success) location.reload(); else alert(data.message); });
+	}
+
+	// 4. Liste Düzenle Modalını Aç
+	function openEditListModal(id, name, desc) {
+		document.getElementById('editListId').value = id;
+		document.getElementById('editListName').value = name;
+		document.getElementById('editListDesc').value = desc;
+		new bootstrap.Modal(document.getElementById('editListModal')).show();
+	}
+
+	// 5. Liste Güncelleme
+	function submitUpdateList() {
+		var id = document.getElementById('editListId').value;
+		var name = document.getElementById('editListName').value;
+		var desc = document.getElementById('editListDesc').value;
+		var formData = new FormData();
+		formData.append('id', id); formData.append('name', name); formData.append('description', desc);
+		fetch('/UserList/UpdateList', { method: 'POST', body: formData })
+			.then(res => res.json()).then(data => { if (data.success) location.reload(); else alert(data.message); });
+	}
+
+	// 6. Yeni Liste Oluştur
+	function submitCreateList() {
+		var name = document.getElementById('listName').value;
+		var desc = document.getElementById('listDesc').value;
+		if (!name) { alert("Lütfen bir isim girin."); return; }
+		var formData = new FormData();
+		formData.append('name', name); formData.append('description', desc);
+		fetch('/UserList/Create', { method: 'POST', body: formData })
+			.then(res => res.json()).then(data => { alert(data.message); if (data.success) location.reload(); });
 	}
 </script>

@@ -11,6 +11,12 @@ public class CreateListDto
 	public string? Description { get; set; }
 }
 
+public class UpdateListDto
+{
+	public string Name { get; set; }
+	public string? Description { get; set; }
+}
+
 public class AddContentDto
 {
 	public string ContentId { get; set; }
@@ -76,5 +82,24 @@ public class UserListController : ControllerBase
 			return BadRequest(new { message = "Icerik kaldirilamadi." });
 
 		return Ok(new { message = "Icerik listeden silindi." });
+	}
+
+	[HttpDelete("{id}")]
+	public async Task<IActionResult> DeleteList(int id)
+	{
+		bool result = await _listService.DeleteListAsync(id);
+		if (!result) return NotFound(new { message = "Liste bulunamadı veya silme yetkiniz yok." });
+
+		return Ok(new { message = "Liste başarıyla silindi." });
+	}
+
+	// 7) Listeyi Güncelle
+	[HttpPut("{id}")]
+	public async Task<IActionResult> UpdateList(int id, [FromBody] UpdateListDto body)
+	{
+		var result = await _listService.UpdateListAsync(id, body.Name, body.Description);
+		if (result == null) return NotFound(new { message = "Liste bulunamadı." });
+
+		return Ok(new { success = true, message = "Liste güncellendi.", data = result });
 	}
 }
