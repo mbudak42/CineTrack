@@ -17,6 +17,10 @@ public class FeedController : Controller
 	{
 		// Web API'ye yönlendir
 		var result = await _api.PostAsync<object>($"api/activity/{id}/like", null);
+
+		// Eğer API null dönerse (hata varsa), boş JSON obje dön ki JS patlamasın ama hatayı anlasın
+		if (result == null) return BadRequest(new { success = false });
+
 		return Content(result, "application/json");
 	}
 
