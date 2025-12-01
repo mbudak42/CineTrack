@@ -3,13 +3,14 @@ function showListContents(listId) {
 	var modal = new bootstrap.Modal(document.getElementById('listDetailModal'));
 	modal.show();
 
+	// ... (DOM element seçimleri aynı kalacak) ...
 	document.getElementById('detailLoading').style.display = 'block';
 	document.getElementById('listContentsContainer').innerHTML = '';
 	document.getElementById('detailEmpty').style.display = 'none';
 	document.getElementById('detailModalTitle').innerText = 'Yükleniyor...';
 	document.getElementById('detailModalDesc').innerText = '';
 
-	fetch('/UserList/GetListDetails/' + listId)
+	fetch(profileConfig.urls.getListDetails + listId)
 		.then(res => res.json())
 		.then(response => {
 			document.getElementById('detailLoading').style.display = 'none';
@@ -29,21 +30,25 @@ function showListContents(listId) {
 				return;
 			}
 
-			var isOwner = @(Model.IsOwner.ToString().ToLower());
+			// HATA BURADAYDI: @(Model.IsOwner...) yerine config'den alıyoruz
+			var isOwner = profileConfig.isOwner;
 			var container = document.getElementById('listContentsContainer');
 
 			list.contents.forEach(item => {
 				var deleteBtn = '';
 				if (isOwner) {
+					// String template içinde onclick düzeltmesi
 					deleteBtn = `
-                            <button onclick="removeContentFromList(${listId}, '${item.id}', this)" 
-                                    class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 shadow-sm" 
-                                    style="z-index: 10; border-radius: 50%; width: 30px; height: 30px; padding: 0; display: flex; align-items: center; justify-content: center;"
-                                    title="Listeden Çıkar">
-                                <i class="bi bi-trash-fill" style="font-size: 0.8rem;"></i>
-                            </button>
-                        `;
+                        <button onclick="removeContentFromList(${listId}, '${item.id}', this)" 
+                                class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 shadow-sm" 
+                                style="z-index: 10; border-radius: 50%; width: 30px; height: 30px; padding: 0; display: flex; align-items: center; justify-content: center;"
+                                title="Listeden Çıkar">
+                            <i class="bi bi-trash-fill" style="font-size: 0.8rem;"></i>
+                        </button>
+                    `;
 				}
+
+				// ... (Geri kalan HTML oluşturma kodu aynı) ...
 				var cardHtml = `
                         <div class="col content-col">
                             <div class="card h-100 shadow-sm position-relative">
@@ -67,9 +72,8 @@ function showListContents(listId) {
 		});
 }
 
-// 2. İçerik Silme
+// 2. İçerik Silme (Fonksiyon aynı kalabilir, endpoint'i hardcode bırakabilir veya configden alabilirsin)
 function removeContentFromList(listId, contentId, btnElement) {
-	// stretched-link ve buton çakışmasını önle
 	if (event) {
 		event.stopPropagation();
 		event.preventDefault();
@@ -81,13 +85,14 @@ function removeContentFromList(listId, contentId, btnElement) {
 	formData.append('listId', listId);
 	formData.append('contentId', contentId);
 
-	fetch('/UserList/RemoveContent', {
+	fetch('/UserList/RemoveContent', { // İstersen profileConfig.urls.removeContent kullanabilirsin
 		method: 'POST',
 		body: formData
 	})
 		.then(res => res.json())
 		.then(data => {
 			if (data.success) {
+				// ... (Animasyon kodları aynı) ...
 				var col = btnElement.closest('.content-col');
 				col.style.transition = 'all 0.3s';
 				col.style.opacity = '0';
@@ -95,7 +100,6 @@ function removeContentFromList(listId, contentId, btnElement) {
 				setTimeout(() => {
 					col.remove();
 					if (document.querySelectorAll('.content-col').length === 0) {
-						// Eğer detay modalındaysak
 						var detailEmpty = document.getElementById('detailEmpty');
 						if (detailEmpty) detailEmpty.style.display = 'block';
 					}

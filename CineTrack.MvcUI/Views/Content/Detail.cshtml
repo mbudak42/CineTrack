@@ -1,4 +1,5 @@
 @model ContentViewModel
+<link rel="stylesheet" href="~/css/Content/detail.css" />
 
 <div class="content-detail container mt-4">
 
@@ -240,5 +241,24 @@
 			</div>
 		</div>
 	</div>
-
 </div>
+
+@section Scripts {
+	<script>
+		// Detail.js için gerekli veriler
+		const contentConfig = {
+			id: '@Model.Id',
+			contentType: '@Model.ContentType',
+			currentUserRating: @(Model.CurrentUserRating), // Sayı olduğu için tırnak içine almadık
+			urls: {
+				rateContent: '/Content/RateContent',
+				addToList: '/Content/AddToList',
+				addComment: '/Content/AddComment',
+				deleteReview: '/Content/DeleteReview',
+				userLists: '/UserList/GetMyLists',
+				userListAdd: '/UserList/AddContent'
+			}
+		};
+	</script>
+	<script src="~/js/Content/detail.js"></script>
+}

@@ -356,5 +356,18 @@
 </div>
 
 @section Scripts {
-    <script src="~/js/User/Profile.js"></script>
+	<script>
+		// Razor değerlerini JS'in okuyabileceği bir objeye aktarıyoruz
+		const profileConfig = {
+			isOwner: @(Model.IsOwner.ToString().ToLower()), // true/false çıktısı verir
+			urls: {
+				removeContent: '/UserList/RemoveContent',
+				deleteList: '/UserList/DeleteList',
+				updateList: '/UserList/UpdateList',
+				createList: '/UserList/Create',
+				getListDetails: '/UserList/GetListDetails/'
+			}
+		};
+	</script>
+	<script src="~/js/User/profile.js"></script>
 }
