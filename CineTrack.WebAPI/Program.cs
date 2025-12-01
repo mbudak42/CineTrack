@@ -22,6 +22,7 @@ builder.Services.AddScoped<ReviewService>();
 builder.Services.AddScoped<FeedService>();
 builder.Services.AddScoped<UserListService>();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddHttpClient();
 
 // 3) JWT kimlik doğrulama
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

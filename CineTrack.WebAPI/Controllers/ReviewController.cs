@@ -37,4 +37,13 @@ public class ReviewController : ControllerBase
 		var reviews = await _reviewService.GetReviewsByUserAsync(userId);
 		return Ok(reviews);
 	}
+
+	[Authorize]
+	[HttpDelete("content/{contentId}")]
+	public async Task<IActionResult> DeleteReview(string contentId)
+	{
+		var result = await _reviewService.DeleteReviewAsync(contentId);
+		if (!result) return NotFound(new { message = "Yorum bulunamadı veya silinemedi." });
+		return Ok(new { message = "Yorum silindi." });
+	}
 }

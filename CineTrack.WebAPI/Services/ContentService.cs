@@ -9,18 +9,17 @@ namespace CineTrack.WebAPI.Services;
 public class ContentService
 {
 	private readonly CineTrackDbContext _context;
-	private readonly HttpClient _httpClient;
+	private readonly IHttpClientFactory _httpClientFactory;
 	private readonly IConfiguration _config;
 
-	public ContentService(CineTrackDbContext context, IConfiguration config)
+	public ContentService(CineTrackDbContext context, IConfiguration config, IHttpClientFactory httpClientFactory)
 	{
 		_context = context;
 		_config = config;
-		_httpClient = new HttpClient();
-		_httpClient.Timeout = TimeSpan.FromSeconds(10); // Timeout ekleyelim
+		_httpClientFactory = httpClientFactory;
 	}
 
-	// 1) Film arama (FİLTRELEME İLE) - DÜZELTİLDİ
+	// 1) Film arama
 	public async Task<List<ContentDto>> SearchMoviesAsync(string query, string? genre = null, string? year = null, double? minRating = null)
 	{
 		var apiKey = _config["ExternalApis:TMDb:ApiKey"];
@@ -28,16 +27,18 @@ public class ContentService
 
 		try
 		{
+			// Client'ı factory'den üretiyoruz
+			var client = _httpClientFactory.CreateClient();
+
 			// Eğer filtre varsa DISCOVER kullan, yoksa SEARCH kullan
 			bool hasFilters = !string.IsNullOrEmpty(genre) || !string.IsNullOrEmpty(year) || minRating.HasValue;
-
 			string url;
-			
+
 			if (hasFilters || string.IsNullOrWhiteSpace(query))
 			{
 				// DISCOVER endpoint (filtreleme için)
 				url = $"{baseUrl}/discover/movie?api_key={apiKey}&language=tr-TR&sort_by=popularity.desc";
-				
+
 				// Yıl filtresi
 				if (!string.IsNullOrEmpty(year))
 				{
@@ -57,9 +58,6 @@ public class ContentService
 				{
 					url += $"&vote_average.gte={minRating.Value}";
 				}
-
-				// Genre filtresi (TMDb genre ID'leri ile çalışır, şimdilik atlıyoruz)
-				// Eğer genre kullanacaksanız, önce genre mapping yapmanız gerekir
 			}
 			else
 			{
@@ -67,15 +65,14 @@ public class ContentService
 				url = $"{baseUrl}/search/movie?api_key={apiKey}&query={Uri.EscapeDataString(query)}&language=tr-TR";
 			}
 
-			var response = await _httpClient.GetStringAsync(url);
+			var response = await client.GetStringAsync(url);
 			using var doc = JsonDocument.Parse(response);
-
 			var results = doc.RootElement.GetProperty("results");
 			var contents = new List<ContentDto>();
 
 			foreach (var item in results.EnumerateArray())
 			{
-				// Query ile manuel filtreleme (discover'da query parametresi yok)
+				// Query ile manuel filtreleme (discover'da query parametresi yoksa)
 				if (!string.IsNullOrWhiteSpace(query) && hasFilters)
 				{
 					var title = item.GetProperty("title").GetString() ?? "";
@@ -83,7 +80,7 @@ public class ContentService
 						continue;
 				}
 
-				// Client-side rating kontrolü (ekstra güvenlik için)
+				// Client-side rating kontrolü
 				if (minRating.HasValue)
 				{
 					var rating = item.TryGetProperty("vote_average", out var voteAvg)
@@ -111,16 +108,6 @@ public class ContentService
 
 			return contents;
 		}
-		catch (HttpRequestException ex)
-		{
-			Console.WriteLine($"SearchMoviesAsync HTTP Error: {ex.Message}");
-			return new List<ContentDto>();
-		}
-		catch (TaskCanceledException ex)
-		{
-			Console.WriteLine($"SearchMoviesAsync Timeout: {ex.Message}");
-			return new List<ContentDto>();
-		}
 		catch (Exception ex)
 		{
 			Console.WriteLine($"SearchMoviesAsync Error: {ex.Message}");
@@ -128,27 +115,27 @@ public class ContentService
 		}
 	}
 
-	// 2) Kitap arama (FİLTRELEME İLE) - DÜZELTİLDİ
+	// 2) Kitap arama
 	public async Task<List<ContentDto>> SearchBooksAsync(string query, string? genre = null, string? year = null, double? minRating = null)
 	{
 		var baseUrl = _config["ExternalApis:GoogleBooks:BaseUrl"];
 
-		// Boş query için genel arama
 		if (string.IsNullOrWhiteSpace(query))
 			query = "bestseller";
 
 		var url = $"{baseUrl}?q={Uri.EscapeDataString(query)}&maxResults=40";
 
-		// Google Books API'si filtrelemeyi query içinde yapar
 		if (!string.IsNullOrEmpty(year))
 		{
-			// Tek yıl veya aralık için query'ye ekle
-			url += $"+subject:{year}"; // veya publishedDate parametresi kullanılabilir
+			url += $"+subject:{year}";
 		}
 
 		try
 		{
-			var response = await _httpClient.GetStringAsync(url);
+			// Client'ı factory'den üretiyoruz
+			var client = _httpClientFactory.CreateClient();
+
+			var response = await client.GetStringAsync(url);
 			using var doc = JsonDocument.Parse(response);
 
 			IEnumerable<JsonElement> items;
@@ -164,12 +151,10 @@ public class ContentService
 			{
 				var volumeInfo = item.GetProperty("volumeInfo");
 
-				// Yıl kontrolü (client-side)
+				// Yıl kontrolü
 				if (!string.IsNullOrEmpty(year))
 				{
-					var publishedDate = volumeInfo.TryGetProperty("publishedDate", out var pd)
-						? pd.GetString()
-						: "";
+					var publishedDate = volumeInfo.TryGetProperty("publishedDate", out var pd) ? pd.GetString() : "";
 
 					if (!string.IsNullOrEmpty(publishedDate) && publishedDate.Length >= 4)
 					{
@@ -181,13 +166,11 @@ public class ContentService
 							var startYear = int.Parse(parts[0]);
 							var endYear = int.Parse(parts[1]);
 
-							if (bookYear < startYear || bookYear > endYear)
-								continue;
+							if (bookYear < startYear || bookYear > endYear) continue;
 						}
 						else
 						{
-							if (bookYear != int.Parse(year))
-								continue;
+							if (bookYear != int.Parse(year)) continue;
 						}
 					}
 					else
@@ -199,15 +182,11 @@ public class ContentService
 				// Rating kontrolü
 				if (minRating.HasValue)
 				{
-					var rating = volumeInfo.TryGetProperty("averageRating", out var ar)
-						? ar.GetDouble()
-						: 0;
-
-					if (rating < minRating.Value)
-						continue;
+					var rating = volumeInfo.TryGetProperty("averageRating", out var ar) ? ar.GetDouble() : 0;
+					if (rating < minRating.Value) continue;
 				}
 
-				// Genre/Category kontrolü
+				// Genre kontrolü
 				if (!string.IsNullOrEmpty(genre))
 				{
 					var hasGenre = false;
@@ -222,9 +201,7 @@ public class ContentService
 							}
 						}
 					}
-
-					if (!hasGenre)
-						continue;
+					if (!hasGenre) continue;
 				}
 
 				var id = item.GetProperty("id").GetString() ?? Guid.NewGuid().ToString();
@@ -248,16 +225,6 @@ public class ContentService
 
 			return contents;
 		}
-		catch (HttpRequestException ex)
-		{
-			Console.WriteLine($"SearchBooksAsync HTTP Error: {ex.Message}");
-			return new List<ContentDto>();
-		}
-		catch (TaskCanceledException ex)
-		{
-			Console.WriteLine($"SearchBooksAsync Timeout: {ex.Message}");
-			return new List<ContentDto>();
-		}
 		catch (Exception ex)
 		{
 			Console.WriteLine($"SearchBooksAsync Error: {ex.Message}");
@@ -265,7 +232,7 @@ public class ContentService
 		}
 	}
 
-	// 3) İçerik detayını getir (önce DB'den, yoksa API'den)
+	// 3) İçerik detayı getir
 	public async Task<ContentDto?> GetContentAsync(string id, string type)
 	{
 		var content = await _context.Contents.FirstOrDefaultAsync(c => c.Id == id);
@@ -281,7 +248,6 @@ public class ContentService
 			};
 		}
 
-		// Harici API'den çek
 		if (type == "movie")
 			return await FetchAndSaveMovieAsync(id);
 		else if (type == "book")
@@ -290,7 +256,7 @@ public class ContentService
 		return null;
 	}
 
-	// 4) Film detayını getir ve kaydet
+	// 4) Film detayı (API'den)
 	private async Task<ContentDto?> FetchAndSaveMovieAsync(string id)
 	{
 		try
@@ -299,7 +265,10 @@ public class ContentService
 			var baseUrl = _config["ExternalApis:TMDb:BaseUrl"];
 			var url = $"{baseUrl}/movie/{id}?api_key={apiKey}&language=tr-TR";
 
-			var response = await _httpClient.GetStringAsync(url);
+			// Client'ı factory'den üretiyoruz
+			var client = _httpClientFactory.CreateClient();
+			var response = await client.GetStringAsync(url);
+
 			using var doc = JsonDocument.Parse(response);
 			var root = doc.RootElement;
 
@@ -336,7 +305,7 @@ public class ContentService
 		}
 	}
 
-	// 5) Kitap detayını getir ve kaydet
+	// 5) Kitap detayı (API'den)
 	private async Task<ContentDto?> FetchAndSaveBookAsync(string id)
 	{
 		try
@@ -344,7 +313,10 @@ public class ContentService
 			var baseUrl = _config["ExternalApis:GoogleBooks:BaseUrl"];
 			var url = $"{baseUrl}/{id}";
 
-			var response = await _httpClient.GetStringAsync(url);
+			// Client'ı factory'den üretiyoruz
+			var client = _httpClientFactory.CreateClient();
+			var response = await client.GetStringAsync(url);
+
 			using var doc = JsonDocument.Parse(response);
 			var info = doc.RootElement.GetProperty("volumeInfo");
 

@@ -106,4 +106,24 @@ public class ReviewService
 			CreatedAt = r.CreatedAt.AddHours(3)
 		}).ToList();
 	}
+
+	public async Task<bool> DeleteReviewAsync(string contentId)
+	{
+		var userId = GetUserId();
+		var review = await _context.Reviews
+			.FirstOrDefaultAsync(r => r.UserId == userId && r.ContentId == contentId);
+
+		if (review == null) return false;
+
+		_context.Reviews.Remove(review);
+
+		// Varsa ilgili aktivite logunu da temizleyelim
+		var activity = await _context.ActivityLogs
+			.FirstOrDefaultAsync(a => a.UserId == userId && a.ContentId == contentId && a.ActionType == "review");
+
+		if (activity != null) _context.ActivityLogs.Remove(activity);
+
+		await _context.SaveChangesAsync();
+		return true;
+	}
 }

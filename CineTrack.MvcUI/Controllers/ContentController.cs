@@ -130,6 +130,16 @@ public class ContentController : Controller
 					Text = r.Text,
 					CreatedAt = r.CreatedAt
 				}).ToList();
+
+				var currentUsername = HttpContext.Session.GetString("username");
+				if (!string.IsNullOrEmpty(currentUsername))
+				{
+					var myReview = reviews.FirstOrDefault(r => r.Username == currentUsername);
+					if (myReview != null)
+					{
+						content.CurrentUserReview = myReview.Text;
+					}
+				}
 			}
 		}
 		catch
@@ -248,5 +258,20 @@ public class ContentController : Controller
 			return Json(new { success = true, message = "Yorumunuz eklendi." });
 
 		return Json(new { success = false, message = "Yorum eklenirken hata oluştu." });
+	}
+
+	// ContentController.cs içine eklenecek
+	[HttpPost]
+	public async Task<IActionResult> DeleteReview(string contentId)
+	{
+		if (HttpContext.Session.GetString("token") == null)
+			return Json(new { success = false, message = "Oturum açmalısınız." });
+
+		var response = await _api.DeleteAsync($"api/review/content/{contentId}");
+
+		if (response)
+			return Json(new { success = true, message = "Yorumunuz silindi." });
+
+		return Json(new { success = false, message = "Silme işlemi başarısız." });
 	}
 }

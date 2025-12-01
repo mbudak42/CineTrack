@@ -108,6 +108,19 @@
 				<button class="btn btn-outline-info flex-grow-1 flex-md-grow-0" onclick="openCustomListModal()">
 					<i class="bi bi-list-stars me-2"></i>Özel Listeye Ekle
 				</button>
+
+				@if (Model.CurrentUserReview != null)
+				{
+					<button class="btn btn-primary flex-grow-1 flex-md-grow-0" onclick="openReviewModal()">
+						<i class="bi bi-pencil-square me-2"></i>Gönderini Düzenle
+					</button>
+				}
+				else
+				{
+					<button class="btn btn-outline-primary flex-grow-1 flex-md-grow-0" onclick="openReviewModal()">
+						<i class="bi bi-chat-left-text me-2"></i>Gönderi Paylaş
+					</button>
+				}
 			</div>
 		</div>
 	</div>
@@ -135,19 +148,6 @@
 		{
 			<div class="alert alert-secondary">Henüz yorum yapılmamış. İlk yorumu sen yap!</div>
 		}
-	</div>
-
-	<div class="card shadow-sm">
-		<div class="card-body">
-			<h5 class="card-title">Yorum Yap</h5>
-			<textarea id="newComment" class="form-control mb-3" rows="3"
-				placeholder="Bu içerik hakkında ne düşünüyorsun?"></textarea>
-			<div class="text-end">
-				<button class="btn btn-primary" onclick="submitComment('@Model.Id', '@Model.ContentType')">
-					<i class="bi bi-send me-1"></i>Gönder
-				</button>
-			</div>
-		</div>
 	</div>
 
 	<div class="modal fade" id="addCustomListModal" tabindex="-1">
@@ -194,6 +194,46 @@
 					<div class="d-grid px-4">
 						<button type="button" class="btn btn-primary btn-lg" onclick="submitRatingWithList()">
 							<i class="bi bi-check-lg me-1"></i>Kaydet ve Listeme Ekle
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="reviewModal" tabindex="-1">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">
+						@(Model.CurrentUserReview != null ? "Gönderini Düzenle" : "Düşüncelerini Paylaş")
+					</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body">
+					<form id="reviewForm">
+						<div class="mb-3">
+							<textarea class="form-control" id="modalReviewText" rows="5"
+								placeholder="Bu içerik hakkında ne düşünüyorsun? Spoiler vermemeye çalış :)">@Model.CurrentUserReview</textarea>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer justify-content-between">
+					@if (Model.CurrentUserReview != null)
+					{
+						<button type="button" class="btn btn-danger" onclick="deleteReview()">
+							<i class="bi bi-trash me-1"></i>Sil
+						</button>
+					}
+					else
+					{
+						<div></div>
+					}
+
+					<div>
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+						<button type="button" class="btn btn-primary" onclick="submitReviewFromModal()">
+							@(Model.CurrentUserReview != null ? "Güncelle" : "Paylaş")
 						</button>
 					</div>
 				</div>
@@ -407,6 +447,62 @@
 			.catch(err => {
 				console.error(err);
 				alert("Bir hata oluştu.");
+			});
+	}
+
+	// Modal'ı aç
+	function openReviewModal() {
+		var modal = new bootstrap.Modal(document.getElementById('reviewModal'));
+		modal.show();
+	}
+
+	// Yorum Gönder / Güncelle
+	function submitReviewFromModal() {
+		var text = document.getElementById("modalReviewText").value;
+		var contentId = '@Model.Id';
+
+		if (!text.trim()) {
+			alert("Lütfen bir şeyler yazın.");
+			return;
+		}
+
+		var formData = new FormData();
+		formData.append('contentId', contentId);
+		formData.append('text', text);
+
+		fetch('/Content/AddComment', { // Mevcut AddComment metodu hem ekleme hem güncelleme yapıyor
+			method: 'POST',
+			body: formData
+		})
+			.then(res => res.json())
+			.then(data => {
+				if (data.success) {
+					location.reload();
+				} else {
+					alert(data.message);
+				}
+			})
+			.catch(err => console.error(err));
+	}
+
+	// Yorum Sil
+	function deleteReview() {
+		if (!confirm("Yorumunuzu silmek istediğinize emin misiniz?")) return;
+
+		var formData = new FormData();
+		formData.append('contentId', '@Model.Id');
+
+		fetch('/Content/DeleteReview', {
+			method: 'POST',
+			body: formData
+		})
+			.then(res => res.json())
+			.then(data => {
+				if (data.success) {
+					location.reload();
+				} else {
+					alert(data.message);
+				}
 			});
 	}
 </script>
