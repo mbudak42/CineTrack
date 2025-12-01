@@ -73,7 +73,7 @@ public class FeedService
 				TargetTitle = content.Title,
 				ContentType = content.ContentType,
 				CoverUrl = content.CoverUrl,
-				CreatedAt = a.CreatedAt,
+				CreatedAt = a.CreatedAt.AddHours(3),
 
 				// Yeni Alanlar
 				LikeCount = likeCount,
@@ -151,7 +151,7 @@ public class FeedService
 				TargetTitle = content.Title,
 				ContentType = content.ContentType,
 				CoverUrl = content.CoverUrl,
-				CreatedAt = a.CreatedAt,
+				CreatedAt = a.CreatedAt.AddHours(3),
 				LikeCount = likeCount,
 				CommentCount = commentCount,
 				IsLiked = isLiked

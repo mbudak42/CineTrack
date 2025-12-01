@@ -62,7 +62,7 @@ public class ReviewService
 			Text = dto.Text,
 			UserId = userId,
 			Username = user!.Username,
-			CreatedAt = DateTime.UtcNow
+			CreatedAt = DateTime.UtcNow.AddHours(3)
 		};
 
 	}
@@ -83,7 +83,7 @@ public class ReviewService
 			Text = r.ReviewText,
 			UserId = r.UserId,
 			Username = r.User!.Username,
-			CreatedAt = r.CreatedAt
+			CreatedAt = r.CreatedAt.AddHours(3)
 		}).ToList();
 	}
 
@@ -103,7 +103,7 @@ public class ReviewService
 			Text = r.ReviewText,
 			UserId = userId,
 			Username = r.User!.Username,
-			CreatedAt = r.CreatedAt
+			CreatedAt = r.CreatedAt.AddHours(3)
 		}).ToList();
 	}
 }
