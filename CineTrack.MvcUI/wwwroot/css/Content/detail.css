@@ -1,0 +1,23 @@
+.star-rating input {
+	display: none;
+}
+
+.star-rating label {
+	font-size: 2.5rem;
+	color: #e9ecef;
+	/* Pasif renk */
+	cursor: pointer;
+	transition: color 0.2s, transform 0.1s;
+}
+
+.star-rating label:hover {
+	transform: scale(1.1);
+}
+
+/* Hover ve Checked durumları (flex-row-reverse sayesinde sağdan sola çalışır) */
+.star-rating input:checked~label,
+.star-rating label:hover,
+.star-rating label:hover~label {
+	color: #ffc107;
+	/* Sarı renk */
+}

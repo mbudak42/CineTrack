@@ -20,7 +20,6 @@ public class ApiService
 		_client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 	}
 
-	// Session'dan token'ı otomatik yükle
 	private void LoadTokenFromSession()
 	{
 		var token = _contextAccessor.HttpContext?.Session.GetString("token");
@@ -36,7 +35,6 @@ public class ApiService
 
 		var response = await _client.GetAsync(endpoint);
 
-		// GÜNCELLEME: Hata varsa konsola yazdır
 		if (!response.IsSuccessStatusCode)
 		{
 			var errorContent = await response.Content.ReadAsStringAsync();
@@ -64,7 +62,6 @@ public class ApiService
 
 		var response = await _client.PostAsync(endpoint, content);
 
-		// ✨ EKLEME: Hata detayını logla
 		var responseBody = await response.Content.ReadAsStringAsync();
 
 		if (!response.IsSuccessStatusCode)
