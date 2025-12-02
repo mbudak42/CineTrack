@@ -31,12 +31,13 @@ public class FeedService
 
 		// Rating ve Review aktivitelerini çek
 		var activities = await _context.ActivityLogs
-		.Include(a => a.User)
-		.Where(a => a.ActionType == "rating" || a.ActionType == "review")
-		.OrderByDescending(a => a.CreatedAt)
-		.Skip((page - 1) * pageSize) // Atla
-		.Take(pageSize)              // Al
-		.ToListAsync();
+			.Include(a => a.User)
+			.Where(a => a.ActionType == "rating" || a.ActionType == "review")
+			.OrderByDescending(a => a.CreatedAt)
+			.ThenByDescending(a => a.Id)
+			.Skip((page - 1) * pageSize)
+			.Take(pageSize)
+			.ToListAsync();
 
 		// İlgili içeriklerin detaylarını (Title, CoverUrl vb.) topluca çek
 		var contentIds = activities

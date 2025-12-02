@@ -62,7 +62,7 @@ public class ContentService
 			else
 			{
 				// SEARCH endpoint (sadece query için)
-				url = $"{baseUrl}/search/movie?api_key={apiKey}&query={Uri.EscapeDataString(query)}&language=tr-TR";
+				url = $"{baseUrl}/search/movie?api_key={apiKey}&query={Uri.EscapeDataString(query)}&language=tr-TR&page={page}";
 			}
 
 			var response = await client.GetStringAsync(url);

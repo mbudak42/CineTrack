@@ -157,35 +157,40 @@ function submitComment() {
 let currentPage = 1;
 let isLoading = false;
 
+// loadMoreActivities fonksiyonunu bu şekilde güncelleyin:
+
 function loadMoreActivities() {
 	if (isLoading) return;
 	isLoading = true;
 
 	const btn = document.getElementById('loadMoreBtn');
-	const originalText = btn.innerHTML;
+	const originalText = btn.innerHTML; // Butonun orijinal metnini sakla
 	btn.innerHTML = '<div class="spinner-border spinner-border-sm text-primary"></div> Yükleniyor...';
 
 	currentPage++;
 
 	fetch(`/Home/LoadMoreFeed?page=${currentPage}`)
 		.then(res => {
-			if (res.status === 204) { // NoContent (Veri bitti)
-				btn.style.display = 'none';
+			if (res.status === 204) { // Veri bitti (204 No Content)
+				btn.className = "btn btn-light text-muted px-4 rounded-pill";
+				btn.disabled = true;
+				btn.innerHTML = "Tüm içerikler yüklendi."; // Kullanıcıya bittiğini söyle
 				return null;
 			}
+			if (!res.ok) throw new Error("API Hatası");
 			return res.text();
 		})
 		.then(html => {
 			if (html) {
 				const container = document.getElementById('feedContainer');
-				// HTML string'i DOM elementine çevirip ekle
 				container.insertAdjacentHTML('beforeend', html);
-				btn.innerHTML = originalText;
+				btn.innerHTML = originalText; // Butonu eski haline getir
 			}
 		})
 		.catch(err => {
 			console.error(err);
-			btn.innerHTML = 'Hata oluştu, tekrar dene';
+			btn.innerHTML = 'Yüklenirken hata oluştu';
+			currentPage--; // Hata olursa sayfa sayısını geri al ki tekrar denenebilsin
 		})
 		.finally(() => {
 			isLoading = false;
