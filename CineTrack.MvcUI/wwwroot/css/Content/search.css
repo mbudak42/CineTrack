@@ -1,7 +1,7 @@
 /* Arama Sayfası Stilleri */
 
 .search-section {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #c5c4c4;
     border-radius: 15px;
     padding: 2rem;
     color: white;
@@ -101,6 +101,13 @@
 /* Bootstrap Icon Renkler */
 .bi-fire {
     animation: pulse 2s infinite;
+}
+
+.search-section form {
+    max-width: 100% !important;
+    background-color: transparent;
+    box-shadow: none;
+    padding: 0;
 }
 
 @keyframes pulse {

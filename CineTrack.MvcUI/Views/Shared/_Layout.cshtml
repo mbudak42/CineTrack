@@ -24,7 +24,7 @@
 					</li>
 					<li class="nav-item">
 						<a class="nav-link" asp-controller="Search" asp-action="Index">
-							<i class="bi bi-search"></i> Ara ve Keşfet
+							Ara ve Keşfet
 						</a>
 					</li>
 				</ul>
@@ -73,7 +73,7 @@
 		</div>
 	</nav>
 
-	<div class="container">
+	<div class="@(ViewData["FluidLayout"] as bool? == true ? "container-fluid" : "container")">
 		<main role="main" class="pb-3">
 			@RenderBody()
 		</main>
