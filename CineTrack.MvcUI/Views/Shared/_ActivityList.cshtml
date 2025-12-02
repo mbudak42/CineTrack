@@ -1,0 +1,87 @@
+@model List<CineTrack.Shared.DTOs.ActivityDto>
+
+@foreach (var item in Model)
+{
+	<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+		<div class="card-header bg-white border-0 p-3 d-flex align-items-center gap-3">
+			<a asp-controller="User" asp-action="Profile" asp-route-id="@item.UserId" class="text-decoration-none">
+				<img src="@(item.UserAvatar ?? "/images/none.png")" alt="@item.Username" class="rounded-circle border"
+					style="width: 45px; height: 45px; object-fit: cover;">
+			</a>
+			<div class="d-flex flex-column">
+				<div class="fw-bold text-dark">
+					<a asp-controller="User" asp-action="Profile" asp-route-id="@item.UserId"
+						class="text-dark text-decoration-none">
+						@item.Username
+					</a>
+					<span class="fw-normal text-muted ms-1">
+						@(item.ActionType == "rating" ? "puanladı" : "inceledi")
+					</span>
+				</div>
+				<small class="text-muted" style="font-size: 0.8rem;">
+					@item.CreatedAt.ToString("dd MMMM HH:mm")
+				</small>
+			</div>
+
+			@if (item.RatingValue.HasValue && item.RatingValue > 0)
+			{
+				<div class="ms-auto bg-warning text-dark px-2 py-1 rounded-3 fw-bold d-flex align-items-center gap-1">
+					<i class="bi bi-star-fill small"></i>
+					<span>@item.RatingValue</span>
+				</div>
+			}
+		</div>
+
+		<div class="card-body p-3 pt-0">
+			<div class="d-flex gap-3">
+				<a asp-controller="Content" asp-action="Detail" asp-route-type="@item.ContentType"
+					asp-route-id="@item.TargetId" class="flex-shrink-0">
+					<img src="@(item.CoverUrl ?? "/images/placeholder.jpg")" class="rounded-3 shadow-sm"
+						alt="@item.TargetTitle" style="width: 100px; aspect-ratio: 2/3; object-fit: cover;">
+				</a>
+
+				<div class="flex-grow-1">
+					<h5 class="fw-bold mb-1">
+						<a asp-controller="Content" asp-action="Detail" asp-route-type="@item.ContentType"
+							asp-route-id="@item.TargetId" class="text-dark text-decoration-none">
+							@item.TargetTitle
+						</a>
+					</h5>
+					<div class="mb-2">
+						<span class="badge @(item.ContentType == "movie" ? "bg-danger" : "bg-info") bg-opacity-75">
+							@(item.ContentType == "movie" ? "Film" : "Kitap")
+						</span>
+					</div>
+
+					@if (!string.IsNullOrEmpty(item.ReviewText))
+					{
+						<div class="bg-light p-3 rounded-3 position-relative mt-2">
+							<i class="bi bi-quote position-absolute top-0 start-0 ms-2 mt-1 text-secondary opacity-25 fs-3"></i>
+							<p class="mb-0 text-dark small fst-italic ps-3 py-1" style="line-height: 1.5;">
+								@item.ReviewText
+							</p>
+						</div>
+					}
+				</div>
+			</div>
+		</div>
+
+		<div class="card-footer bg-white border-top p-2 d-flex justify-content-between align-items-center">
+			<button class="btn btn-sm btn-light @(item.IsLiked ? "text-danger" : "text-muted")"
+				onclick="toggleLike(this, @item.Id)">
+				<i class="bi @(item.IsLiked ? "bi-heart-fill" : "bi-heart") me-1"></i>
+				<span>@item.LikeCount</span> Beğeni
+			</button>
+
+			<button class="btn btn-sm btn-light text-primary" onclick="openCommentsModal(@item.Id)">
+				<i class="bi bi-chat-dots me-1"></i>
+				<span>@item.CommentCount</span> Yorum
+			</button>
+
+			<a asp-controller="Content" asp-action="Detail" asp-route-type="@item.ContentType" asp-route-id="@item.TargetId"
+				class="btn btn-sm btn-light text-secondary">
+				<i class="bi bi-arrow-right-short"></i> İncele
+			</a>
+		</div>
+	</div>
+}

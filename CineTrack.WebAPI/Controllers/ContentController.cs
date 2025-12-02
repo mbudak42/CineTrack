@@ -20,12 +20,13 @@ public class ContentController : ControllerBase
 		[FromQuery] string q,
 		[FromQuery] string? genre = null,
 		[FromQuery] string? year = null,
-		[FromQuery] double? minRating = null)
+		[FromQuery] double? minRating = null,
+		[FromQuery] int page = 1)
 	{
 		if (string.IsNullOrWhiteSpace(q))
 			return BadRequest(new { message = "Arama sorgusu gerekli." });
 
-		var results = await _contentService.SearchMoviesAsync(q, genre, year, minRating);
+		var results = await _contentService.SearchMoviesAsync(q, genre, year, minRating, page);
 		return Ok(results);
 	}
 
@@ -35,12 +36,13 @@ public class ContentController : ControllerBase
 		[FromQuery] string q,
 		[FromQuery] string? genre = null,
 		[FromQuery] string? year = null,
-		[FromQuery] double? minRating = null)
+		[FromQuery] double? minRating = null,
+		[FromQuery] int page = 1)
 	{
 		if (string.IsNullOrWhiteSpace(q))
 			return BadRequest(new { message = "Arama sorgusu gerekli." });
 
-		var results = await _contentService.SearchBooksAsync(q, genre, year, minRating);
+		var results = await _contentService.SearchBooksAsync(q, genre, year, minRating, page);
 		return Ok(results);
 	}
 

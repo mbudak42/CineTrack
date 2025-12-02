@@ -18,9 +18,9 @@ public class FeedController : ControllerBase
 	// Takip ettiklerinin aktiviteleri (login gerekli)
 	[Authorize]
 	[HttpGet]
-	public async Task<IActionResult> GetFeed()
+	public async Task<IActionResult> GetFeed([FromQuery] int page = 1)
 	{
-		var feed = await _feedService.GetFeedAsync();
+		var feed = await _feedService.GetFeedAsync(page, 15);
 		return Ok(feed);
 	}
 

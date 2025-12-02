@@ -119,4 +119,27 @@ public class SearchController : Controller
 			: $"api/content/search/movies?{paramString}";
 	}
 
+	[HttpGet]
+	public async Task<IActionResult> LoadMoreSearch(string query, string contentType, string genre, string year, double? minRating, int page)
+	{
+		// API endpoint oluşturma mantığı SearchController içinde vardı, onu buraya uyarlayın
+		// veya BuildSearchEndpoint metodunu kullanın.
+		string endpoint = BuildSearchEndpoint(query, contentType, genre, year, minRating);
+
+		// Page parametresini ekle
+		endpoint += $"&page={page}";
+
+		var results = await _api.GetAsync<List<ContentCardDto>>(endpoint);
+
+		if (results == null || !results.Any()) return NoContent();
+
+		// SearchResults için _SearchResults partial view'ı veya _ContentCard döngüsü kullanın
+		// Burada _ContentGrid partial'ı kullanamayız çünkü o tüm listeyi alıyor, biz tek tek kart basacağız veya yeni bir partial yapacağız.
+		// En temizi _ContentGrid.cshtml'i kullanmak yerine sonuçları direkt JSON dönüp JS ile basmak ya da 
+		// kartları içeren bir PartialView dönmek.
+
+		// Öneri: _ContentCardList.cshtml adında sadece döngüyü içeren bir partial yapın.
+		return PartialView("_ContentCardList", results);
+	}
+
 }

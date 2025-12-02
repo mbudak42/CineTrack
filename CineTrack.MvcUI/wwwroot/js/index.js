@@ -153,3 +153,41 @@ function submitComment() {
 			btn.innerText = originalText;
 		});
 }
+
+let currentPage = 1;
+let isLoading = false;
+
+function loadMoreActivities() {
+	if (isLoading) return;
+	isLoading = true;
+
+	const btn = document.getElementById('loadMoreBtn');
+	const originalText = btn.innerHTML;
+	btn.innerHTML = '<div class="spinner-border spinner-border-sm text-primary"></div> Yükleniyor...';
+
+	currentPage++;
+
+	fetch(`/Home/LoadMoreFeed?page=${currentPage}`)
+		.then(res => {
+			if (res.status === 204) { // NoContent (Veri bitti)
+				btn.style.display = 'none';
+				return null;
+			}
+			return res.text();
+		})
+		.then(html => {
+			if (html) {
+				const container = document.getElementById('feedContainer');
+				// HTML string'i DOM elementine çevirip ekle
+				container.insertAdjacentHTML('beforeend', html);
+				btn.innerHTML = originalText;
+			}
+		})
+		.catch(err => {
+			console.error(err);
+			btn.innerHTML = 'Hata oluştu, tekrar dene';
+		})
+		.finally(() => {
+			isLoading = false;
+		});
+}

@@ -74,21 +74,19 @@
 	@if (!string.IsNullOrWhiteSpace(Model.Query))
 	{
 		<div class="results-section mt-4">
-			<h5 class="mb-3">Sonuçlar <span class="text-muted small">(@Model.SearchResults.Count)</span></h5>
-			@if (Model.SearchResults.Any())
+			<h5 class="mb-3">Sonuçlar</h5>
+
+			<div id="searchResultsContainer" class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-3">
+				@* İlk sayfa *@
+				@await Html.PartialAsync("_ContentCardList", Model.SearchResults)
+			</div>
+
+			@if (Model.SearchResults.Count >= 20) // API genelde 20 döner, eğer dolu geldiyse buton koy
 			{
-				<div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-3">
-					@foreach (var content in Model.SearchResults)
-					{
-						<div class="col">@await Html.PartialAsync("_ContentCard", content)</div>
-					}
-				</div>
-			}
-			else
-			{
-				<div class="text-center py-5 text-muted bg-light rounded">
-					<i class="bi bi-search display-6 d-block mb-3 opacity-50"></i>
-					Aradığınız kriterlere uygun içerik bulunamadı.
+				<div class="text-center mt-5">
+					<button id="loadMoreSearchBtn" class="btn btn-outline-primary px-5" onclick="loadMoreResults()">
+						Daha Fazla Yükle
+					</button>
 				</div>
 			}
 		</div>
@@ -130,5 +128,46 @@
 				document.getElementById('searchForm').submit();
 			}
 		});
+
+		let searchPage = 1;
+
+		function loadMoreResults() {
+			const btn = document.getElementById('loadMoreSearchBtn');
+			btn.disabled = true;
+			btn.innerText = 'Yükleniyor...';
+
+			searchPage++;
+
+			// URL'den mevcut filtreleri al
+			const params = new URLSearchParams(window.location.search);
+			const query = params.get('query') || '';
+			const type = document.querySelector('select[name="contentType"]').value;
+			const genre = document.querySelector('select[name="genre"]').value;
+			const year = document.querySelector('select[name="year"]').value;
+			const minRating = document.querySelector('select[name="minRating"]').value;
+
+			// LoadMore action'ına istek at
+			const url = `/Search/LoadMoreSearch?query=${query}&contentType=${type}&genre=${genre}&year=${year}&minRating=${minRating}&page=${searchPage}`;
+
+			fetch(url)
+				.then(res => {
+					if (res.status === 204) {
+						btn.style.display = 'none'; // Veri bitti
+						return null;
+					}
+					return res.text();
+				})
+				.then(html => {
+					if (html) {
+						document.getElementById('searchResultsContainer').insertAdjacentHTML('beforeend', html);
+						btn.disabled = false;
+						btn.innerText = 'Daha Fazla Yükle';
+					}
+				})
+				.catch(err => {
+					console.error(err);
+					btn.innerText = 'Hata';
+				});
+		}
 	</script>
 }

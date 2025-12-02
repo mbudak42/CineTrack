@@ -1,0 +1,5 @@
+@model List<CineTrack.MvcUI.Models.ContentCardDto>
+@foreach (var content in Model)
+{
+	<div class="col">@await Html.PartialAsync("_ContentCard", content)</div>
+}

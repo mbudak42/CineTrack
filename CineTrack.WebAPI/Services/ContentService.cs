@@ -20,7 +20,7 @@ public class ContentService
 	}
 
 	// 1) Film arama
-	public async Task<List<ContentDto>> SearchMoviesAsync(string query, string? genre = null, string? year = null, double? minRating = null)
+	public async Task<List<ContentDto>> SearchMoviesAsync(string query, string? genre = null, string? year = null, double? minRating = null, int page = 1)
 	{
 		var apiKey = _config["ExternalApis:TMDb:ApiKey"];
 		var baseUrl = _config["ExternalApis:TMDb:BaseUrl"];
@@ -45,11 +45,11 @@ public class ContentService
 					if (year.Contains("-"))
 					{
 						var parts = year.Split('-');
-						url += $"&primary_release_date.gte={parts[0]}-01-01&primary_release_date.lte={parts[1]}-12-31";
+						url = $"{baseUrl}/discover/movie?api_key={apiKey}&language=tr-TR&sort_by=popularity.desc&page={page}";
 					}
 					else
 					{
-						url += $"&primary_release_year={year}";
+						url = $"{baseUrl}/search/movie?api_key={apiKey}&query={Uri.EscapeDataString(query)}&language=tr-TR&page={page}";
 					}
 				}
 
@@ -116,14 +116,16 @@ public class ContentService
 	}
 
 	// 2) Kitap arama
-	public async Task<List<ContentDto>> SearchBooksAsync(string query, string? genre = null, string? year = null, double? minRating = null)
+	public async Task<List<ContentDto>> SearchBooksAsync(string query, string? genre = null, string? year = null, double? minRating = null, int page = 1)
 	{
 		var baseUrl = _config["ExternalApis:GoogleBooks:BaseUrl"];
 
 		if (string.IsNullOrWhiteSpace(query))
 			query = "bestseller";
 
-		var url = $"{baseUrl}?q={Uri.EscapeDataString(query)}&maxResults=40";
+		int pageSize = 24;
+		int startIndex = (page - 1) * pageSize;
+		var url = $"{baseUrl}?q={Uri.EscapeDataString(query)}&startIndex={startIndex}&maxResults={pageSize}";
 
 		if (!string.IsNullOrEmpty(year))
 		{

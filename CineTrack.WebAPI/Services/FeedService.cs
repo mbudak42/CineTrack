@@ -25,17 +25,18 @@ public class FeedService
 	}
 
 	// 1) Ana Akış (Feed) Getir - Beğeni ve Yorum verileriyle
-	public async Task<List<ActivityDto>> GetFeedAsync()
+	public async Task<List<ActivityDto>> GetFeedAsync(int page = 1, int pageSize = 15)
 	{
 		var currentUserId = GetUserId();
 
 		// Rating ve Review aktivitelerini çek
 		var activities = await _context.ActivityLogs
-			.Include(a => a.User)
-			.Where(a => a.ActionType == "rating" || a.ActionType == "review")
-			.OrderByDescending(a => a.CreatedAt)
-			.Take(50) // Son 50 aktivite
-			.ToListAsync();
+		.Include(a => a.User)
+		.Where(a => a.ActionType == "rating" || a.ActionType == "review")
+		.OrderByDescending(a => a.CreatedAt)
+		.Skip((page - 1) * pageSize) // Atla
+		.Take(pageSize)              // Al
+		.ToListAsync();
 
 		// İlgili içeriklerin detaylarını (Title, CoverUrl vb.) topluca çek
 		var contentIds = activities
