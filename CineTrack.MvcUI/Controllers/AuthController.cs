@@ -2,6 +2,7 @@ using CineTrack.MvcUI.Models;
 using CineTrack.MvcUI.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using CineTrack.Shared.DTOs;
 
 namespace CineTrack.MvcUI.Controllers;
 
@@ -115,5 +116,45 @@ public class AuthController : Controller
 	{
 		HttpContext.Session.Clear();
 		return RedirectToAction("Index", "Home");
+	}
+
+	[HttpGet]
+	public IActionResult ForgotPassword() => View();
+
+	[HttpPost]
+	public async Task<IActionResult> ForgotPassword(ForgotPasswordDto model)
+	{
+		// API'ye istek at
+		await _api.PostAsync("api/auth/forgot-password", model);
+		// Güvenlik açısından her zaman başarılı mesajı gösteriyoruz
+		ViewBag.Message = "E-posta adresiniz kayıtlıysa sıfırlama bağlantısı gönderildi.";
+		return View();
+	}
+
+	// --- Şifre Sıfırlama Sayfası (Linke tıklanınca burası açılır) ---
+	[HttpGet]
+	public IActionResult ResetPassword(string token, string email)
+	{
+		if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(email))
+			return RedirectToAction("Login");
+
+		return View(new ResetPasswordDto { Token = token, Email = email });
+	}
+
+	[HttpPost]
+	public async Task<IActionResult> ResetPassword(ResetPasswordDto model)
+	{
+		if (!ModelState.IsValid) return View(model);
+
+		var response = await _api.PostAsync("api/auth/reset-password", model);
+
+		if (response != null)
+		{
+			ViewBag.Success = true;
+			return View(model); // Veya Login'e yönlendirebilirsiniz.
+		}
+
+		ModelState.AddModelError("", "Şifre sıfırlama başarısız. Token geçersiz olabilir.");
+		return View(model);
 	}
 }

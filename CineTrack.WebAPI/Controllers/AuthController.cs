@@ -42,4 +42,25 @@ public class AuthController : ControllerBase
 			return BadRequest(new { message = ex.Message });
 		}
 	}
+
+	[HttpPost("forgot-password")]
+	public async Task<IActionResult> ForgotPassword(ForgotPasswordDto dto)
+	{
+		await _authService.GeneratePasswordResetTokenAsync(dto.Email);
+		return Ok(new { message = "Eğer kayıtlı bir e-posta ise sıfırlama bağlantısı gönderildi." });
+	}
+
+	[HttpPost("reset-password")]
+	public async Task<IActionResult> ResetPassword(ResetPasswordDto dto)
+	{
+		try
+		{
+			await _authService.ResetPasswordAsync(dto);
+			return Ok(new { message = "Şifreniz başarıyla güncellendi." });
+		}
+		catch (Exception ex)
+		{
+			return BadRequest(new { message = ex.Message });
+		}
+	}
 }

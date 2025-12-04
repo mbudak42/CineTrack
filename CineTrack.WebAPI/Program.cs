@@ -21,6 +21,7 @@ builder.Services.AddScoped<RatingService>();
 builder.Services.AddScoped<ReviewService>();
 builder.Services.AddScoped<FeedService>();
 builder.Services.AddScoped<UserListService>();
+builder.Services.AddScoped<EmailService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient();
 

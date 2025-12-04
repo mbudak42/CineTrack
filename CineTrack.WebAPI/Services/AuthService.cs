@@ -12,11 +12,13 @@ public class AuthService
 {
 	private readonly CineTrackDbContext _context;
 	private readonly JwtService _jwtService;
+	private readonly EmailService _emailService;
 
-	public AuthService(CineTrackDbContext context, JwtService jwtService)
+	public AuthService(CineTrackDbContext context, JwtService jwtService, EmailService emailService)
 	{
 		_context = context;
 		_jwtService = jwtService;
+		_emailService = emailService;
 	}
 
 	public async Task<AuthResponseDto> RegisterAsync(UserRegisterDto dto)
@@ -85,5 +87,42 @@ public class AuthService
 	private bool VerifyPassword(string password, string hash)
 	{
 		return HashPassword(password) == hash;
+	}
+
+	public async Task GeneratePasswordResetTokenAsync(string email)
+	{
+		var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+		if (user == null) return; // Güvenlik gereği kullanıcı yoksa bile hata dönmeyiz veya "bulunamadı" deriz.
+
+		// Rastgele Token oluştur
+		var token = Guid.NewGuid().ToString();
+		user.PasswordResetToken = token;
+		user.PasswordResetTokenExpires = DateTime.UtcNow.AddHours(1); // 1 saat geçerli
+
+		await _context.SaveChangesAsync();
+
+		// Link: MVC UI adresine yönlendirmeli (localhost:5215 varsayılan port)
+		var resetLink = $"http://localhost:5215/Auth/ResetPassword?token={token}&email={email}";
+
+		var body = $"<h3>Şifre Sıfırlama</h3><p>Şifrenizi sıfırlamak için <a href='{resetLink}'>tıklayınız</a>.</p>";
+
+		await _emailService.SendEmailAsync(email, "CineTrack Şifre Sıfırlama", body);
+	}
+
+	// 2. Şifreyi Sıfırla
+	public async Task ResetPasswordAsync(ResetPasswordDto dto)
+	{
+		var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+
+		if (user == null || user.PasswordResetToken != dto.Token || user.PasswordResetTokenExpires < DateTime.UtcNow)
+		{
+			throw new Exception("Geçersiz veya süresi dolmuş token.");
+		}
+
+		user.PasswordHash = HashPassword(dto.NewPassword);
+		user.PasswordResetToken = null;
+		user.PasswordResetTokenExpires = null;
+
+		await _context.SaveChangesAsync();
 	}
 }
