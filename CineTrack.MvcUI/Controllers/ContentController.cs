@@ -115,7 +115,26 @@ public class ContentController : Controller
 					// Kitap kodları buraya (değişiklik yok)
 					var info = root.GetProperty("volumeInfo");
 					content.Overview = info.TryGetProperty("description", out var d) ? d.GetString() : "";
-					// ... diğer kitap alanları ...
+
+					if (info.TryGetProperty("authors", out var authorsProp))
+					{
+						content.Authors = authorsProp.EnumerateArray()
+							.Select(a => a.GetString() ?? "")
+							.ToList();
+					}
+
+					// Sayfa sayısı (isteğe bağlı, zaten varsa kalsın)
+					content.DurationOrPageCount = info.TryGetProperty("pageCount", out var pc) ? pc.GetInt32() : null;
+
+					// Yayın tarihi/yılı (isteğe bağlı)
+					if (info.TryGetProperty("publishedDate", out var pd))
+					{
+						var dateStr = pd.GetString();
+						if (!string.IsNullOrEmpty(dateStr) && dateStr.Length >= 4)
+						{
+							content.Year = int.Parse(dateStr.Substring(0, 4));
+						}
+					}
 				}
 			}
 			catch (Exception ex)

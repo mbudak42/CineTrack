@@ -292,7 +292,7 @@ public class ContentService
 			var apiKey = _config["ExternalApis:TMDb:ApiKey"];
 			var baseUrl = _config["ExternalApis:TMDb:BaseUrl"];
 			var client = _httpClientFactory.CreateClient();
-			var response = await client.GetStringAsync($"{baseUrl}/movie/{id}?api_key={apiKey}&language=tr-TR");
+			var response = await client.GetStringAsync($"{baseUrl}/movie/{id}?api_key={apiKey}&language=tr-TR&append_to_response=credits");
 			using var doc = JsonDocument.Parse(response);
 			var root = doc.RootElement;
 			var title = root.GetProperty("title").GetString()!;
