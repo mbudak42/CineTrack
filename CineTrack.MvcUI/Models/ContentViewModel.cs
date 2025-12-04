@@ -13,8 +13,11 @@ public class ContentViewModel
 	public int? Year { get; set; }
 	public int? DurationOrPageCount { get; set; } // Film süresi / kitap sayfa sayısı
 	public List<string> Genres { get; set; } = new();
-	public List<string> Directors { get; set; } = new(); // film
-	public List<string> Authors { get; set; } = new();   // kitap
+	public List<string> Directors { get; set; } = new();
+
+	public List<string> Cast { get; set; } = new();
+
+	public List<string> Authors { get; set; } = new();
 
 	// Puanlama
 	public double? AverageRating { get; set; }

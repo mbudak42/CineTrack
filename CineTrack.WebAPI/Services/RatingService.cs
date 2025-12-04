@@ -75,4 +75,16 @@ public class RatingService
 
 		return rating?.RatingValue ?? 0;
 	}
+
+	public async Task<(double Average, int Count)> GetRatingStatsAsync(string contentId)
+	{
+		var ratings = await _context.Ratings
+			.Where(r => r.ContentId == contentId)
+			.ToListAsync();
+
+		if (ratings.Count == 0) return (0, 0);
+
+		var average = Math.Round(ratings.Average(r => r.RatingValue), 1); // Ondalık basamağı 1 yapalım (örn: 8.5)
+		return (average, ratings.Count);
+	}
 }

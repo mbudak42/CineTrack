@@ -45,7 +45,14 @@ public class RatingController : ControllerBase
 		var userIdStr = _http.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 		if (string.IsNullOrEmpty(userIdStr)) return Ok(new { rating = 0 });
 
-		int userId = int.Parse(userIdStr);var rating = await _ratingService.GetUserRatingAsync(userId, contentId);
+		int userId = int.Parse(userIdStr); var rating = await _ratingService.GetUserRatingAsync(userId, contentId);
 		return Ok(new { rating = rating });
+	}
+
+	[HttpGet("stats/{contentId}")]
+	public async Task<IActionResult> GetRatingStats(string contentId)
+	{
+		var stats = await _ratingService.GetRatingStatsAsync(contentId);
+		return Ok(new { average = stats.Average, count = stats.Count });
 	}
 }
