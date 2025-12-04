@@ -196,3 +196,21 @@ function loadMoreActivities() {
 			isLoading = false;
 		});
 }
+
+function toggleReview(id) {
+	const shortText = document.getElementById(`review-short-${id}`);
+	const fullText = document.getElementById(`review-full-${id}`);
+	const btn = document.getElementById(`review-btn-${id}`);
+
+	if (shortText.style.display !== 'none') {
+		// Tamamını göster
+		shortText.style.display = 'none';
+		fullText.style.display = 'inline';
+		btn.innerText = 'Daha az göster';
+	} else {
+		// Kısalt
+		shortText.style.display = 'inline';
+		fullText.style.display = 'none';
+		btn.innerText = 'Devamını oku';
+	}
+}

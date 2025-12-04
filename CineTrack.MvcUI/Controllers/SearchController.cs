@@ -27,23 +27,18 @@ public class SearchController : Controller
 
 		try
 		{
-			// Türleri yükle
-			model.AvailableGenres =
-				await _api.GetAsync<List<string>>("api/content/genres")
-				?? new List<string>();
+			model.AvailableGenres = await _api.GetAsync<List<string>>("api/content/genres") ?? new List<string>();
 
-			// Arama yapıldıysa
-			if (!string.IsNullOrWhiteSpace(query))
+			// Filtre veya arama varsa sonuçları getir
+			if (!string.IsNullOrWhiteSpace(query) || !string.IsNullOrWhiteSpace(genre) || !string.IsNullOrWhiteSpace(year) || minRating.HasValue)
 			{
 				string endpoint = BuildSearchEndpoint(query, contentType, genre, year, minRating);
-
 				var searchResults = await _api.GetAsync<List<ContentCardDto>>(endpoint);
-
 				model.SearchResults = searchResults ?? new List<ContentCardDto>();
 			}
 			else
 			{
-				// Arama yapılmadıysa vitrinleri göster
+				// Vitrinleri yükle
 				await LoadShowcases(model);
 			}
 		}
@@ -56,90 +51,53 @@ public class SearchController : Controller
 		return View(model);
 	}
 
-	// AJAX ile arama sonuçlarını getir
+	// AJAX: Daha fazla sonuç yükle
 	[HttpGet]
-	public async Task<IActionResult> SearchPartial(string query, string? contentType, string? genre, string? year, double? minRating)
+	public async Task<IActionResult> LoadMoreSearch(string? query, string? contentType, string? genre, string? year, double? minRating, int page)
 	{
 		try
 		{
 			string endpoint = BuildSearchEndpoint(query, contentType, genre, year, minRating);
+			endpoint += $"&page={page}";
 
-			var searchResults = await _api.GetAsync<List<ContentCardDto>>(endpoint);
+			var results = await _api.GetAsync<List<ContentCardDto>>(endpoint);
 
-			return PartialView("_SearchResults", searchResults ?? new List<ContentCardDto>());
+			if (results == null || !results.Any())
+				return NoContent(); // 204 döner, JS butonu gizler
+
+			return PartialView("_ContentCardList", results);
 		}
-		catch (Exception ex)
+		catch
 		{
-			Console.WriteLine($"SearchPartial Error: {ex.Message}");
-			return PartialView("_SearchResults", new List<ContentCardDto>());
+			return NoContent();
 		}
 	}
 
-	// Vitrinleri yükle (En Yüksek Puanlılar, En Popülerler)
+	private string BuildSearchEndpoint(string? query, string? type, string? genre, string? year, double? minRating)
+	{
+		var parameters = new List<string>();
+
+		if (!string.IsNullOrWhiteSpace(query)) parameters.Add($"q={Uri.EscapeDataString(query)}");
+		if (!string.IsNullOrWhiteSpace(genre)) parameters.Add($"genre={Uri.EscapeDataString(genre)}");
+		if (!string.IsNullOrWhiteSpace(year)) parameters.Add($"year={Uri.EscapeDataString(year)}");
+		if (minRating.HasValue) parameters.Add($"minRating={minRating}");
+
+		string paramString = string.Join("&", parameters);
+		string endpointType = (type == "book") ? "books" : "movies";
+
+		return $"api/content/search/{endpointType}?{paramString}";
+	}
+
 	private async Task LoadShowcases(SearchViewModel model)
 	{
 		try
 		{
-			model.TopRated =
-				await _api.GetAsync<List<ContentCardDto>>("api/content/top-rated?limit=12")
-				?? new List<ContentCardDto>();
-
-			model.MostPopular =
-				await _api.GetAsync<List<ContentCardDto>>("api/content/most-popular?limit=12")
-				?? new List<ContentCardDto>();
+			model.TopRated = await _api.GetAsync<List<ContentCardDto>>("api/content/top-rated?limit=12") ?? new List<ContentCardDto>();
+			model.MostPopular = await _api.GetAsync<List<ContentCardDto>>("api/content/most-popular?limit=12") ?? new List<ContentCardDto>();
 		}
 		catch (Exception ex)
 		{
 			Console.WriteLine($"Showcase Error: {ex.Message}");
 		}
 	}
-
-	// Arama endpointini oluştur
-	private string BuildSearchEndpoint(string query, string? type, string? genre, string? year, double? minRating)
-	{
-		var parameters = new List<string>
-	{
-		$"q={Uri.EscapeDataString(query)}"
-	};
-
-		if (!string.IsNullOrWhiteSpace(genre))
-			parameters.Add($"genre={Uri.EscapeDataString(genre)}");
-
-		// year hem tek yil hem aralik olabilir
-		if (!string.IsNullOrWhiteSpace(year))
-			parameters.Add($"year={Uri.EscapeDataString(year)}");
-
-		if (minRating.HasValue)
-			parameters.Add($"minRating={minRating}");
-
-		string paramString = string.Join("&", parameters);
-
-		return type == "book"
-			? $"api/content/search/books?{paramString}"
-			: $"api/content/search/movies?{paramString}";
-	}
-
-	[HttpGet]
-	public async Task<IActionResult> LoadMoreSearch(string query, string contentType, string genre, string year, double? minRating, int page)
-	{
-		// API endpoint oluşturma mantığı SearchController içinde vardı, onu buraya uyarlayın
-		// veya BuildSearchEndpoint metodunu kullanın.
-		string endpoint = BuildSearchEndpoint(query, contentType, genre, year, minRating);
-
-		// Page parametresini ekle
-		endpoint += $"&page={page}";
-
-		var results = await _api.GetAsync<List<ContentCardDto>>(endpoint);
-
-		if (results == null || !results.Any()) return NoContent();
-
-		// SearchResults için _SearchResults partial view'ı veya _ContentCard döngüsü kullanın
-		// Burada _ContentGrid partial'ı kullanamayız çünkü o tüm listeyi alıyor, biz tek tek kart basacağız veya yeni bir partial yapacağız.
-		// En temizi _ContentGrid.cshtml'i kullanmak yerine sonuçları direkt JSON dönüp JS ile basmak ya da 
-		// kartları içeren bir PartialView dönmek.
-
-		// Öneri: _ContentCardList.cshtml adında sadece döngüyü içeren bir partial yapın.
-		return PartialView("_ContentCardList", results);
-	}
-
 }

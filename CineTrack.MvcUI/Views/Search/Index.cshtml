@@ -81,7 +81,7 @@
 				@await Html.PartialAsync("_ContentCardList", Model.SearchResults)
 			</div>
 
-			@if (Model.SearchResults.Count >= 20) // API genelde 20 döner, eğer dolu geldiyse buton koy
+			@if (Model.SearchResults.Count >= 18)
 			{
 				<div class="text-center mt-5">
 					<button id="loadMoreSearchBtn" class="btn btn-outline-primary px-5" onclick="loadMoreResults()">

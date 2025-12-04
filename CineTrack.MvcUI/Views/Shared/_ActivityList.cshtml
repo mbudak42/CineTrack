@@ -56,9 +56,24 @@
 					@if (!string.IsNullOrEmpty(item.ReviewText))
 					{
 						<div class="bg-light p-3 rounded-3 position-relative mt-2">
-							<i class="bi bi-quote position-absolute top-0 start-0 ms-2 mt-1 text-secondary opacity-25 fs-3"></i>
+							@*<i class="bi bi-quote position-absolute top-0 start-0 ms-2 mt-1 text-secondary opacity-25 fs-3"></i>*@
 							<p class="mb-0 text-dark small fst-italic ps-3 py-1" style="line-height: 1.5;">
-								@item.ReviewText
+								@if (item.ReviewText.Length > 150)
+								{
+									<span id="review-short-@item.Id">
+										@item.ReviewText.Substring(0, 150)...
+									</span>
+									<span id="review-full-@item.Id" style="display: none;">
+										@item.ReviewText
+									</span>
+									<a href="javascript:void(0)" onclick="toggleReview(@item.Id)" id="review-btn-@item.Id"
+										class="text-primary fw-bold text-decoration-none ms-1" style="font-size: 0.8em;">Devamını
+										oku</a>
+								}
+								else
+								{
+									@item.ReviewText
+								}
 							</p>
 						</div>
 					}
