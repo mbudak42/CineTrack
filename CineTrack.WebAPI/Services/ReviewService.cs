@@ -30,6 +30,7 @@ public class ReviewService
 		var existing = await _context.Reviews
 			.FirstOrDefaultAsync(r => r.UserId == userId && r.ContentId == dto.ContentId);
 
+		// 1. Review Tablosunu Güncelleme (Burada değişiklik yok)
 		if (existing != null)
 		{
 			existing.ReviewText = dto.Text;
@@ -49,13 +50,37 @@ public class ReviewService
 		}
 
 		var user = await _context.Users.FindAsync(userId);
-		_context.ActivityLogs.Add(new ActivityLog
+
+		// --- DEĞİŞİKLİK BURADA BAŞLIYOR ---
+
+		// Önce bu kullanıcı bu içerik için daha önce bir 'review' aktivitesi oluşturmuş mu kontrol ediyoruz.
+		var existingActivity = await _context.ActivityLogs
+			.FirstOrDefaultAsync(a => a.UserId == userId &&
+									  a.ContentId == dto.ContentId &&
+									  a.ActionType == "review");
+
+		if (existingActivity == null)
 		{
-			UserId = userId,
-			ActionType = "review",
-			ContentId = dto.ContentId
-		});
+			// Eğer aktivite yoksa (ilk defa yorum yapılıyorsa) yeni ekle
+			_context.ActivityLogs.Add(new ActivityLog
+			{
+				UserId = userId,
+				ActionType = "review",
+				ContentId = dto.ContentId
+			});
+		}
+		else
+		{
+			// Eğer aktivite varsa, sadece tarihini güncelle (böylece akışta en üste çıkar)
+			// Eğer en üste çıkmasını istemiyorsan bu satırı silebilirsin.
+			existingActivity.CreatedAt = DateTime.UtcNow;
+		}
+
+		// Değişiklikleri kaydet
 		await _context.SaveChangesAsync();
+
+		// --- DEĞİŞİKLİK BURADA BİTİYOR ---
+
 		return new ReviewDto
 		{
 			ContentId = dto.ContentId,
@@ -64,7 +89,6 @@ public class ReviewService
 			Username = user!.Username,
 			CreatedAt = DateTime.UtcNow.AddHours(3)
 		};
-
 	}
 
 	// 2) Belirli içeriğin tüm yorumlarını getir
